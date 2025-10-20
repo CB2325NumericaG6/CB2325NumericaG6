@@ -1,2 +1,7 @@
 */__pycache__
 **/*.debug.*
+build
+.venv
+.pdm-python
+**/*-info
+dist
