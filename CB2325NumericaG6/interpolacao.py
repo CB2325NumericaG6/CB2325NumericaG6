@@ -1,21 +1,26 @@
+from typing import Callable, Sequence
+
+Interpolator = Callable[[float], float]
+
 def poly_interp(x, y) -> float:
     # TODO: Implement this
     raise NotImplementedError
 
-def linear_interp(x: list, y: list) -> callable:
-    """Creates a linear interpolation function from a set of X,Y coordinates,
+def linear_interp(x: Sequence, y: Sequence) -> Interpolator:
+    """Creates a linear interpolation function from a set of X,Y coordinates, 
     assuming a strictly increasing set of X-values.
 
     Args:
-        x: X-axis coordinate list
-        y: Y-axis coordinate list
+        x (Sequence): X-axis coordinate list
+        y (Sequence): Y-axis coordinate list
     
     Returns:
-        callable: Return linear-interpolated value for a certain point.
+        Callable([float], float): Callable returns linearly-interpolated value based on given sets
+          for a certain point.
     """
 
     if len(x) != len(y) or len(x) < 2:
-        raise ValueError("x and y mus have the same length and have atleast 2 points.")
+        raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
     
     def interpolation(v) -> float:
         start,end = 0, len(x)
