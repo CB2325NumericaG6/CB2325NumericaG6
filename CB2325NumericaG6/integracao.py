@@ -2,14 +2,20 @@ from typing import Callable
 
 
 def integral(f:Callable, start: float, end: float, divisions: int) -> float:
-    """
-        This method will calculate by trapezoidal aproximation the integral of a function.
-        
-        Args:
-            f (Callable): Function.
-            start (float): start point
-            end (float): end point
-            divisions (int): number of divisions, higher divisions implies a more precise approximation but also requires more CPU.
+    """Esse método calcula a integral de uma função por aproximação trapezoidal
+    Args:
+        f (Callable): Função a ser integrada
+        start (float): Ponto inicial do intervalo
+        end (float): Ponto final do intervalo
+        divisions (int): Número de subdivisões do intervalo: números maiores implicam uma aproximação mais precisa, mas também consome mais CPU.
+    Returns:
+        float: Valor da integral.
+    Examples:
+        >>> import math
+        >>> f = lambda x: math.sin(x)**2+math.cos(x)**2
+        >>> i = integracao.integral(f, 0, 2, 1000)
+        >>> print(i)
+        2.0
     """
     
     sumVal: float = 0
