@@ -3,6 +3,8 @@ from typing import Callable, Sequence
 Interpolator = Callable[[float], float]
 
 def poly_interp(x, y) -> float:
+    #Teste commit
+    print("Teste")
     # TODO: Implement this
     raise NotImplementedError
 
