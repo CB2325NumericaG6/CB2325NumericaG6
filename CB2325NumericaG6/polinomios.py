@@ -58,6 +58,35 @@ class Polinomio:
     def degree(self) -> int:
         return len(self._values)-1
     
+    def evaluate(self, x: float) -> float:
+        """
+            Avalia o polinômio P(x) para um dado valor de x usando o Método de Horner.
+            
+            P é uma lista de coeficientes em ordem decrescente: [c_n, ..., c_0].
+            
+            Args:
+                x (float): O ponto onde o polinômio será avaliado.
+                
+            Returns:
+                float: O valor P(x).
+            
+            Examples:
+                >>> P = Polinomio([2,3,4])
+                >>> val = P.evaluate(1)
+                >>> print(val)
+                9
+
+        """
+        if not self._values:
+            return 0.0
+
+        resultado = self._values[0] 
+        
+        for i in range(1, len(self._values)):
+            resultado = resultado * x + self._values[i]
+            
+        return resultado
+    
 def diffPol(pol: Polinomio) -> Polinomio:
     """
         Retorna a derivada de um polinomio.
@@ -86,6 +115,9 @@ def diffPol(pol: Polinomio) -> Polinomio:
     return Polinomio(derivative)
 
 if __name__ == "__main__":
-    pol = Polinomio([-3.0,2.0,4.0])
+    pol = Polinomio([2,5,4,8,5,-3.0,2.0,4.0])
+    p2 = Polinomio([2,3,4])
     dPol = diffPol(pol)
     print(dPol)
+
+    print(p2.evaluate(1))
