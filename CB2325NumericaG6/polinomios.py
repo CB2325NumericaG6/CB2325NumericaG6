@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 class Polinomio:
     """
@@ -11,7 +11,8 @@ class Polinomio:
 
     def __init__(self, values: List[float]):
         self._values = values
-        self._clearZeros()
+        if float(values[0]) == 0.0:
+            self._clearZeros()
     
     def __repr__(self):
         return str(self._values)
@@ -48,11 +49,26 @@ class Polinomio:
             else:
                 break
         
-        if count < len(self._values) - 1:
+        if count == len(self._values):
+            self._values = []
+        elif count> 0:
             self._values = self._values[count:]
         
         if not self._values:
             self._values.append(0.0)
+
+    
+    def _clean_by_tolerance(self, tolerance: float) -> 'Polinomio':
+        """
+        TODO: Talvez substituir quando o calculo de erros for implementado em .erros.py
+
+        Cria um novo Polinomio zerando coeficientes abaixo da tolerância para evitar erros numéricos.
+        """
+        new_values = [
+            coef if abs(coef) >= tolerance else 0.0
+            for coef in self._values
+        ]
+        return Polinomio(new_values)
 
     @property
     def degree(self) -> int:
@@ -87,6 +103,98 @@ class Polinomio:
             
         return resultado
     
+    def __mul__(self, other: float | int) -> 'Polinomio':
+        if isinstance(other, (float, int)):
+            newValues = [c * float(other) for c in self._values]
+            return Polinomio(newValues)
+        return NotImplemented
+
+    def __rmul__(self, other: float | int) -> 'Polinomio':
+        return self.__mul__(other)
+    
+    def __neg__(self) -> 'Polinomio':
+        new_values = [-c for c in self._values]
+        return Polinomio(new_values)
+    
+    def __add__(self, other: 'Polinomio') -> 'Polinomio':
+        p1Values = self._values
+        p2Values = other._values
+        
+        maxLen = max(len(p1Values), len(p2Values))
+
+        p1Reversed = p1Values[::-1]
+        p2Reversed = p2Values[::-1]
+        
+        sumReverse = []
+        for i in range(maxLen):
+            c1 = p1Reversed[i] if i < len(p1Reversed) else 0.0
+            c2 = p2Reversed[i] if i < len(p2Reversed) else 0.0
+            sumReverse.append(c1 + c2)
+            
+        return Polinomio(sumReverse[::-1])
+    
+    def __sub__(self, other: 'Polinomio') -> 'Polinomio':
+        negOther = -other 
+        return self + negOther
+    
+    def __eq__(self):
+        return NotImplemented
+
+    def divideBy(self, divisor: 'Polinomio', tolerance: float = 1e-12) -> Tuple['Polinomio', 'Polinomio']:
+        """
+            Realiza a divisão polinomial A / B (self / divisor) e retorna (Quociente, remainder).
+
+            Args:
+                divisor (Polinomio): Polinomio divisor
+                tolerance (float, optional): Tolerância para checagem de zero, usado para
+                    tratar erros de ponto flutuante. O valor padrão é 1e-12.
+
+            Returns:
+                Polinomio: Polinomio derivado
+
+            Examples:
+                >>> p1 = Polinomio([4,6,8])
+                >>> p2 = Polinomio([2,3,4])
+                >>> print(p1.divideBy(p2))
+                ([2.0], [0.0])
+        """
+
+        if divisor.degree < 0 or abs(divisor._values[0]) < tolerance:
+            raise ValueError("Cannot divide by the zero polynomial.")
+
+        if self.degree < divisor.degree:
+            return Polinomio([0.0]), Polinomio(self._values)
+
+        mainDivisor = divisor._values[0]
+        divisorDegree = divisor.degree
+        
+        quotientCoeffs = [0.0] * (self.degree - divisorDegree + 1)
+
+        remainder = Polinomio(self._values) 
+        
+        while remainder.degree >= divisorDegree:
+            mainRemainder = remainder._values[0]
+            
+            degreeDifference = remainder.degree - divisorDegree
+            
+            qCoeff = mainRemainder / mainDivisor
+
+            qIdx = self.degree - remainder.degree
+            quotientCoeffs[qIdx] = qCoeff
+    
+            multipliedTherm = divisor * qCoeff 
+
+            shiftCoeffs = multipliedTherm._values + [0.0] * degreeDifference
+            thermToSub = Polinomio(shiftCoeffs)
+
+            remainder = remainder - thermToSub 
+            remainder = remainder._clean_by_tolerance(tolerance)
+
+        if remainder.degree < 0:
+            remainder = Polinomio([0.0])
+
+        return Polinomio(quotientCoeffs), remainder
+    
 def diffPol(pol: Polinomio) -> Polinomio:
     """
         Retorna a derivada de um polinomio.
@@ -116,7 +224,14 @@ def diffPol(pol: Polinomio) -> Polinomio:
 
 if __name__ == "__main__":
     pol = Polinomio([2,5,4,8,5,-3.0,2.0,4.0])
+    p1 = Polinomio([4,6,8])
     p2 = Polinomio([2,3,4])
+
+    p3 = p1.divideBy(p2, tolerance=1e-5)
+
+    print(p2*2 - p1)
+    print(p3)
+
     dPol = diffPol(pol)
     print(dPol)
 
