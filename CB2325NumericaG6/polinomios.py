@@ -9,8 +9,15 @@ class Polinomio:
     Exemplo: O polinômio P(x) = 3x^2 + 2x - 1 é representado por [3.0, 2.0, -1.0].
     """
 
+    #TODO Implementar um método melhor de definição de tolerância a partir do módelo de erros, ou por épsilon de máquina
+    TOLERANCE = 1e-12 
+
     def __init__(self, values: List[float]):
-        self._values = values
+        self._values = [
+            float(v) if abs(v) >= self.TOLERANCE else 0.0
+            for v in values
+        ]
+
         if float(values[0]) == 0.0:
             self._clearZeros()
     
@@ -57,22 +64,13 @@ class Polinomio:
         if not self._values:
             self._values.append(0.0)
 
-    
-    def _clean_by_tolerance(self, tolerance: float) -> 'Polinomio':
-        """
-        TODO: Talvez substituir quando o calculo de erros for implementado em .erros.py
-
-        Cria um novo Polinomio zerando coeficientes abaixo da tolerância para evitar erros numéricos.
-        """
-        new_values = [
-            coef if abs(coef) >= tolerance else 0.0
-            for coef in self._values
-        ]
-        return Polinomio(new_values)
-
     @property
     def degree(self) -> int:
         return len(self._values)-1
+    
+    @property
+    def isZero(self) -> bool:
+        return self._values == [0.0]
     
     def evaluate(self, x: float) -> float:
         """
@@ -117,30 +115,40 @@ class Polinomio:
         return Polinomio(new_values)
     
     def __add__(self, other: 'Polinomio') -> 'Polinomio':
-        p1Values = self._values
-        p2Values = other._values
+        """Adição de polinômios: P1 + P2 (Começando pelo termo de maior grau)"""
         
-        maxLen = max(len(p1Values), len(p2Values))
+        p1Coeffs = self._values
+        p2Coeffs = other._values
 
-        p1Reversed = p1Values[::-1]
-        p2Reversed = p2Values[::-1]
+        len1 = len(p1Coeffs)
+        len2 = len(p2Coeffs)
+        maxLen = max(len1, len2)
         
-        sumReverse = []
+        newCoeffs = [0.0] * maxLen
+        
         for i in range(maxLen):
-            c1 = p1Reversed[i] if i < len(p1Reversed) else 0.0
-            c2 = p2Reversed[i] if i < len(p2Reversed) else 0.0
-            sumReverse.append(c1 + c2)
+            idx1 = len1 - 1 - i
+            idx2 = len2 - 1 - i
+            idx_res = maxLen - 1 - i
             
-        return Polinomio(sumReverse[::-1])
+            c1 = p1Coeffs[idx1] if idx1 >= 0 else 0.0
+            c2 = p2Coeffs[idx2] if idx2 >= 0 else 0.0
+            
+            newCoeffs[idx_res] = c1 + c2
+            
+        return Polinomio(newCoeffs)
     
     def __sub__(self, other: 'Polinomio') -> 'Polinomio':
         negOther = -other 
         return self + negOther
     
-    def __eq__(self):
-        return NotImplemented
+    def __eq__(self, other: 'Polinomio') -> bool:
+        #Assume que ambos não tem coeficiente líderes 0.
+        if not isinstance(Polinomio):
+            return NotImplemented
+        return other._values == self._values
 
-    def divideBy(self, divisor: 'Polinomio', tolerance: float = 1e-12) -> Tuple['Polinomio', 'Polinomio']:
+    def divideBy(self, divisor: 'Polinomio') -> Tuple['Polinomio', 'Polinomio']:
         """
             Realiza a divisão polinomial A / B (self / divisor) e retorna (Quociente, remainder).
 
@@ -159,11 +167,16 @@ class Polinomio:
                 ([2.0], [0.0])
         """
 
-        if divisor.degree < 0 or abs(divisor._values[0]) < tolerance:
+        if divisor.degree < 0 or abs(divisor._values[0]) < self.TOLERANCE:
             raise ValueError("Cannot divide by the zero polynomial.")
 
         if self.degree < divisor.degree:
             return Polinomio([0.0]), Polinomio(self._values)
+        
+        if divisor.degree == 0:
+            constante_divisor = divisor._values[0]
+            qCoeffs = [c / constante_divisor for c in self._values]
+            return Polinomio(qCoeffs), Polinomio([0.0])
 
         mainDivisor = divisor._values[0]
         divisorDegree = divisor.degree
@@ -188,7 +201,6 @@ class Polinomio:
             thermToSub = Polinomio(shiftCoeffs)
 
             remainder = remainder - thermToSub 
-            remainder = remainder._clean_by_tolerance(tolerance)
 
         if remainder.degree < 0:
             remainder = Polinomio([0.0])
@@ -227,7 +239,7 @@ if __name__ == "__main__":
     p1 = Polinomio([4,6,8])
     p2 = Polinomio([2,3,4])
 
-    p3 = p1.divideBy(p2, tolerance=1e-5)
+    p3 = p1.divideBy(p2)
 
     print(p2*2 - p1)
     print(p3)
