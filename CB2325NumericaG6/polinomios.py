@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
 class Polinomio:
     """
@@ -281,6 +281,27 @@ def diffPol(pol: Polinomio) -> Polinomio:
         derivative.append(pol[i]*(pol.degree-i))
 
     return Polinomio(derivative)
+
+def lambdify(P: 'Polinomio') -> Callable[[float], float]:
+    """
+    Cria e retorna uma função lambda (Callable) que avalia o polinômio P(x).
+    
+    Isso permite que o objeto Polinomio seja usado em métodos que esperam 
+    uma função f(x), como Bisseção ou Secante.
+    
+    Args:
+        P (Polinomio): O objeto Polinomio a ser convertido.
+        
+    Returns:
+        Callable[[float], float]: Uma função lambda que recebe x (float) 
+                                  e retorna P(x) (float).
+    """
+    
+    def func_wrapper(x: float) -> float:
+        """Função interna que avalia o polinômio P em x."""
+        return P.evaluate(x)
+        
+    return func_wrapper
 
 if __name__ == "__main__":
     pol = Polinomio([2,5,4,8,5,-3.0,2.0,4.0])
