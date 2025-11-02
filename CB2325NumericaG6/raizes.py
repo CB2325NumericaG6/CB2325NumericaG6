@@ -95,7 +95,6 @@ def _sturmSequence(P: Polinomio) -> List[Polinomio]:
     index = 1
     while True:
         _, remainder = sequence[index-1].divideBy(sequence[index])
-        print(remainder)
         if remainder.isZero:
             break
 
