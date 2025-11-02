@@ -2,11 +2,45 @@ from typing import Callable, Sequence
 
 Interpolator = Callable[[float], float]
 
-def poly_interp(x, y) -> float:
+def Hermite_poly_interp(x, y) -> float:
     #Teste commit
     print("Teste")
     # TODO: Implement this
     raise NotImplementedError
+
+def poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator:
+    """
+    Creates a polynomial interpolation function from a set of X and Y coordinates,
+    using the Lagrange form.
+
+    Args:
+        x (Sequence[float]): Sequence of X-axis coordinates.
+        y (Sequence[float]): Sequence of Y-axis coordinates.
+
+    Returns:
+        Interpolator: A callable function that evaluates the interpolating polynomial
+        for any given float input.
+
+    Raises:
+        ValueError: If x and y have different lengths or contain fewer than two points.
+    """
+    if len(x) != len(y) or len(x) < 2:
+        raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
+    
+    n = len(x)
+
+    def P(X: float) -> float:
+        total = 0.0
+        for i in range(n):
+            Li = 1.0
+            for j in range(n):
+                if i != j:
+                    Li *= (X - x[j]) / (x[i] - x[j])
+            total += y[i] * Li
+        return total
+
+    return P
+
 
 def linear_interp(x: Sequence, y: Sequence) -> Interpolator:
     """Creates a linear interpolation function from a set of X,Y coordinates, 
