@@ -171,5 +171,7 @@ if __name__ == '__main__':
     print(newton_raphson(f, df, 5, 10 **-6))
 
     P = Polinomio([1.0,-2.0,-2.0,2.0, 0])
-    raizes = sturm(P, -2, 3)
+    bounds = P.getRealRootBounds()
+    print(bounds)
+    raizes = sturm(P, bounds[0], bounds[1])
     print(raizes)
