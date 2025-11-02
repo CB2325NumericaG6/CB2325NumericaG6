@@ -2,11 +2,51 @@ from typing import Callable, Sequence
 
 Interpolator = Callable[[float], float]
 
-def Hermite_poly_interp(x, y) -> float:
-    #Teste commit
-    print("Teste")
-    # TODO: Implement this
-    raise NotImplementedError
+def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> Interpolator:
+    """
+    Creates a Hermite polynomial interpolation function from a set of X,Y coordinates
+    and their derivatives.
+
+    Args:
+        x (Sequence[float]): X-axis coordinates.
+        y (Sequence[float]): Y-axis values at the coordinates.
+        dy (Sequence[float]): Derivative values at the coordinates.
+    
+    Returns:
+        Interpolator: A callable function that evaluates the Hermite interpolating polynomial.
+    
+    Raises:
+        ValueError: If x, y, dy have different lengths or contain fewer than two points.
+    """
+    if len(x) != len(y) or len(x) != len(dy) or len(x) < 2:
+        raise ValueError(
+            f"x, y, dy must have the same length and contain at least two points "
+        )
+    
+    n = len(x)
+
+    def P(X: float) -> float:
+        total = 0.0
+        for i in range(n):
+            # Lagrange polynome L_i(x)
+            Li = 1.0
+            for j in range(n):
+                if j != i:
+                    Li *= (X - x[j]) / (x[i] - x[j])
+            
+            # deff of L_i in x_i
+            Li_prime = sum(
+                1 / (x[i] - x[m]) for m in range(n) if m != i
+            )
+            
+            # Hermite polynomial base for H_i and K_i
+            Hi = (1 - 2*Li_prime*(X - x[i])) * Li**2
+            Ki = (X - x[i]) * Li**2
+            
+            total += y[i]*Hi + dy[i]*Ki
+        return total
+
+    return P
 
 def poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator:
     """
