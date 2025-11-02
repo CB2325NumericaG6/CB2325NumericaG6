@@ -207,6 +207,54 @@ class Polinomio:
 
         return Polinomio(quotientCoeffs), remainder
     
+    def _getPNeg(self) -> 'Polinomio':
+        """
+        Cria e retorna o polinômio auxiliar P(-x).
+        Isso inverte o sinal dos coeficientes dos termos de grau ímpar.
+        """
+        PNegCoeffs = []
+        
+        for i, coeff in enumerate(self._values):
+            degree = self.degree - i
+
+            if degree % 2 != 0:
+                PNegCoeffs.append(-coeff)
+            else:
+                PNegCoeffs.append(coeff)
+                
+        return Polinomio(PNegCoeffs)
+    
+    def getRealRootBounds(self) -> tuple[float, float]:
+        """
+            Calcula os limites superior positivo (L) e inferior negativo (l) 
+            para todas as raízes reais do polinômio P(x)
+            (Teorema dos Limites para Raízes de Polinômios (Cauchy Bound)).
+        """
+        if self.degree == 0:
+            return 0.0, 0.0
+        
+        cn = self._values[0]
+        cMax = max(abs(c) for c in self._values[1:]) if self.degree > 0 else 0.0
+            
+        if cMax == 0.0:
+            L = 0.0
+        else:
+            L = 1.0 + (cMax / abs(cn))
+
+        pNeg = self._getPNeg() 
+        
+        cnNeg = pNeg._values[0]
+        cMaxNeg = max(abs(c) for c in pNeg._values[1:]) if pNeg.degree > 0 else 0.0
+        
+        if cMaxNeg == 0.0:
+            Lneg = 0.0
+        else:
+            Lneg = 1.0 + (cMaxNeg / abs(cnNeg))
+
+        l = -Lneg
+        
+        return l, L
+
 def diffPol(pol: Polinomio) -> Polinomio:
     """
         Retorna a derivada de um polinomio.
