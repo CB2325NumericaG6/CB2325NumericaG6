@@ -1,6 +1,5 @@
+from .polinomios import Polinomio
 
-
-
-def ajuste_linear(x: list[float], y: list[float]) -> list[float]:
+def ajuste_linear(x: list[float], y: list[float]) -> Polinomio:
     # TODO: Implement this
     raise NotImplementedError
