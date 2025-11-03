@@ -139,7 +139,7 @@ hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> I
 **Retorno:**
 - Interpolator: Uma função que retorna o valor em um ponto pela interpolação de hermite baseado nos valores X, Y, dy.
 
-# Interpolação (.interpolacao)
+# Polinomios (.polinomios)
 
 Módulo para definição e cálculo de polinomios.
 
