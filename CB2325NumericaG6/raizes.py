@@ -1,4 +1,5 @@
-from typing import Literal, Callable
+from typing import Callable, List
+from polinomios import Polinomio, diffPol
 
 
 def secante(f: Callable, a: float, b: float, tol: float) -> float:
@@ -88,6 +89,77 @@ def newton_raphson(f: Callable, df: Callable, a:float, tol: float) -> float:
     
     return aproximacao
 
+def _sturmSequence(P: Polinomio) -> List[Polinomio]:
+    sequence = [P, diffPol(P)]
+    remainder = sequence[1]
+    index = 1
+    while True:
+        _, remainder = sequence[index-1].divideBy(sequence[index])
+        if remainder.isZero:
+            break
+
+        sequence.append(-remainder)
+        index += 1
+
+    return sequence
+
+def _countSignVariations(sequence: List[Polinomio], x):
+    # TODO: Talvez substituir tolerância por algum calculo de erro no futuro quando .erros.py for implementado
+    tolerance = 1e-15
+
+    changes = 0
+    signs = []
+    for p in sequence:
+        value = p.evaluate(x)
+        if abs(value) < tolerance:
+            continue
+
+        if value > 0:
+            signs.append(True)
+        else:
+            signs.append(False)
+
+    if len(signs) < 2:
+        return 0
+    
+    last = signs[0]
+    for i in range(1, len(signs)):
+        if signs[i] != last:
+            last = signs[i]
+            changes += 1
+
+    return changes
+
+def sturm(P: Polinomio, a: float, b: float) -> int:
+    """
+        Calcula o número de raízes reais de um polinomio no intervalo (a,b].
+
+        Args:
+            P (Polinomio): Polinomio a ser avaliado.
+            a (float): Extremo inferior do intervalo.
+            b (flaot): Extremo superior do intervalo.
+        
+        Returns:
+            int: Número de raízes reais no intervalo (a,b]
+        
+        Raises:
+            ValueError: Limite inferior a é maior ou igual que limite superior b
+        
+        Examples:
+            >>> P = Polinomio([1.0,-2.0,-2.0,2.0, 0])
+            >>> raizes = sturm(P, -2, 3)
+            >>> print(raizes)
+
+    """
+    if a >= b:
+        raise ValueError("O limite inferior 'a' deve ser menor que o limite superior 'b'.")
+
+    sequence = _sturmSequence(P)
+
+    signsA = _countSignVariations(sequence, a)
+    signsB = _countSignVariations(sequence, b)
+
+    return signsA - signsB
 
 if __name__ == '__main__':
     f = lambda x: x**2 - 16
@@ -96,3 +168,9 @@ if __name__ == '__main__':
     print(bissecao(f, 3, 5, 10 **-6))
     print(secante(f, 3, 5, 10 **-6))
     print(newton_raphson(f, df, 5, 10 **-6))
+
+    P = Polinomio([1.0,-2.0,-2.0,2.0, 0])
+    bounds = P.getRealRootBounds()
+    print(bounds)
+    raizes = sturm(P, bounds[0], bounds[1])
+    print(raizes)
