@@ -1,9 +1,20 @@
+import numpy as np
 
+def erro_absoluto(valor_real, valor_aprox):
+    """
+    Calcula o erro absoluto entre um ou mais valores reais e aproximados.
+    
+    Esta função é 'vectorizada': ela aceita tanto números únicos
+    quanto arrays NumPy.
 
-def erro_absoluto(valor_real: float, valor_aprox: float) -> float:
-    """Return the absolute Error of an aproximations by calculating the absolute of the difference between the values"""
-    return abs(valor_real-valor_aprox)
+    Fórmula: ea = |valor_real - valor_aprox|
+    
+    Args:
+        valor_real (float ou np.ndarray): O valor exato ou de referência.
+        valor_aprox (float ou np.ndarray): O valor obtido ou medido.
 
-def erro_relativo(valor_real: float, valor_aprox: float) -> float:
-    # TODO: Implement this
-    raise NotImplementedError
+    Returns:
+        float ou np.ndarray: O erro absoluto.
+    """
+    # np.abs lida automaticamente com escalares e arrays
+    return np.abs(valor_real - valor_aprox)
