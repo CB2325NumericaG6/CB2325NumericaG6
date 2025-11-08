@@ -83,7 +83,7 @@ class RealFunction:
 
     f: Callable[[float], float]
     prime: Optional[Callable[[float], float]]
-    domain: Optional[Domain]
+    domain: Optional[Interval]
     
     def eval_safe(self, x):
         if self.domain is None or x in self.domain:
