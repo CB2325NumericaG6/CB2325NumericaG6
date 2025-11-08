@@ -1,7 +1,9 @@
 # Alunos Responsáveis: Marcelo Alves, Vinícios Flesh
 
 from typing import Callable, List
-from polinomios import Polinomio, diffPol
+# Tentar executar localmente a partir da pasta geral do repositório vai dar erro, mas é assim mesmo que o import deve estar para o deploy.
+# Se quiser testar localmente use o comando 'python -m CB2325NumericaG6.raizes' sem as aspas.
+from .polinomios import Polinomio
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np
@@ -274,7 +276,7 @@ def plot_newton_raphson(f: Callable, intervalo:tuple[float, float], df: Callable
 
 
 def _sturmSequence(P: Polinomio) -> List[Polinomio]:
-    sequence = [P, diffPol(P)]
+    sequence = [P, P.diff()]
     remainder = sequence[1]
     index = 1
     while True:
