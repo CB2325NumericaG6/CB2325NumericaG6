@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Sequence
 import matplotlib.pyplot as plt
 
 # Gostei muito da implementação dessas classes da lista 7 do professor então decidi implementar com pequenas modificações
@@ -42,21 +42,39 @@ class Interval(Domain):
         return (self.max - self.min)
     
     @property
-    def haf(self):
+    def half(self):
         return (self.max + self.min)/2.0
     
-    def __contains__(self, x):
-        return NotImplementedError
+    def __contains__(self, other):
+        if isinstance(other, Interval):
+            return other.min >= self.min and other.max <= self.max
+        elif isinstance(other, (float, int)):
+            return self.min <= other <= self.max
+        elif isinstance(other, Sequence):
+            for i in other:
+                if not (self.min <= i <= self.max):
+                    return False
+            return True
+        else:
+            return False
+
 
     def __str__(self):
-        return f'[{self.inff:2.4f}, {self.supp:2.4f}]' 
+        return f'[{self.min:2.4f}, {self.max:2.4f}]' 
 
     def __repr__(self):
-        return f'[{self.inff!r:2.4f}, {self.supp!r:2.4f}]'
+        return f'[{self.min!r:2.4f}, {self.max!r:2.4f}]'
     
     def copy(self):
-        return Interval(self.inff, self.supp)
+        return Interval(self.min, self.max)
 
+    def intersect(self, other: 'Interval') -> Optional['Interval']:
+        if not isinstance(other, Interval):
+            return None
+        
+        newMin = max(self.min, other.min)
+        newMax = min(self.max, other.max)
+        return Interval(newMin,newMax) if newMin <= newMax else None
 
 class RealFunction:
     """
@@ -108,3 +126,12 @@ def linspace(min: float, max: float, points: int) -> list[float]:
         return [min]
     step = (max - min) / (points - 1)
     return [(step * i + min) for i in range(points)]
+
+def safe_intersect(d1: Optional['Interval'], d2: Optional['Interval']) -> Optional['Interval']:
+    """
+    Calcula a intersecção de dois intervalos, lidando com valores None.
+    """
+    if d1 is None or d2 is None:
+        return None
+
+    return d1.intersect(d2)
