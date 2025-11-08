@@ -1,6 +1,10 @@
-from typing import List, Tuple, Callable
+from typing import List, Tuple, Callable, Optional, cast
+# Tentar executar localmente a partir da pasta geral do repositório vai dar erro, mas é assim mesmo que deve estar para o deploy.
+# Se quiser testar localmente use o comando 'python -m CB2325NumericaG6.polinomios' sem as aspas.
+from .core import RealFunction, Interval, Domain, safe_intersect
+from sys import float_info
 
-class Polinomio:
+class Polinomio(RealFunction):
     """
     Representa um polinômio como uma lista de coeficientes, ordenados 
     do termo de **maior grau** para o termo constante.
@@ -9,17 +13,32 @@ class Polinomio:
     Exemplo: O polinômio P(x) = 3x^2 + 2x - 1 é representado por [3.0, 2.0, -1.0].
     """
 
-    #TODO Implementar um método melhor de definição de tolerância a partir do módelo de erros, ou por épsilon de máquina
-    TOLERANCE = 1e-12 
+    # Importa o epsilon de maquina do sistema
+    BASE_TOLERANCE = float_info.epsilon 
 
-    def __init__(self, values: List[float]):
+    def __init__(self, values: List[float], domain: Optional[Interval] = None):
+        maxAbsCoeff = max((abs(v) for v in values), default=1.0)
+        
+        # Calcula a tolerância relativa para o polinomio
+        self.TOLERANCE = self.BASE_TOLERANCE * maxAbsCoeff
+
+        if self.TOLERANCE == 0.0:
+            self.TOLERANCE = self.BASE_TOLERANCE
+
         self._values = [
             float(v) if abs(v) >= self.TOLERANCE else 0.0
             for v in values
         ]
 
-        if float(values[0]) == 0.0:
+        if self._values and abs(self._values[0]) < self.TOLERANCE:
             self._clearZeros()
+
+        self.f = lambda x: self.evaluate(x)
+        self.domain = domain
+        self._primeFunc = None
+
+    def __call__(self, x) -> float:
+        return super().__call__(x)
     
     def __repr__(self):
         return str(self._values)
@@ -27,7 +46,7 @@ class Polinomio:
     def __len__(self):
         return len(self._values)
     
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         size = len(self._values)
         if abs(index) >= size:
             raise IndexError("index out of range")
@@ -36,7 +55,7 @@ class Polinomio:
         else:
             return self._values[index]
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index: int, value: float):
         size = len(self._values)
         if abs(index) >= size:
             raise IndexError("assignment index out of range")
@@ -72,6 +91,13 @@ class Polinomio:
     def isZero(self) -> bool:
         return self._values == [0.0]
     
+    @property
+    def prime(self): # type: ignore
+        if self._primeFunc is None:
+            polinomio_derivado = self.diff()
+            self._primeFunc = lambda x: polinomio_derivado.evaluate(x) 
+        return self._primeFunc
+    
     def evaluate(self, x: float) -> float:
         """
             Avalia o polinômio P(x) para um dado valor de x usando o Método de Horner.
@@ -102,21 +128,21 @@ class Polinomio:
         return resultado
     
     def __mul__(self, other: float | int) -> 'Polinomio':
-        if isinstance(other, (float, int)):
-            newValues = [c * float(other) for c in self._values]
-            return Polinomio(newValues)
-        return NotImplemented
+        newValues = [c * float(other) for c in self._values]
+        return Polinomio(newValues, self.domain)
 
     def __rmul__(self, other: float | int) -> 'Polinomio':
         return self.__mul__(other)
     
     def __neg__(self) -> 'Polinomio':
         new_values = [-c for c in self._values]
-        return Polinomio(new_values)
+        return Polinomio(new_values, self.domain)
     
     def __add__(self, other: 'Polinomio') -> 'Polinomio':
         """Adição de polinômios: P1 + P2 (Começando pelo termo de maior grau)"""
         
+        newDomain = safe_intersect(self.domain, other.domain)
+
         p1Coeffs = self._values
         p2Coeffs = other._values
 
@@ -136,15 +162,15 @@ class Polinomio:
             
             newCoeffs[idx_res] = c1 + c2
             
-        return Polinomio(newCoeffs)
+        return Polinomio(newCoeffs, newDomain)
     
     def __sub__(self, other: 'Polinomio') -> 'Polinomio':
         negOther = -other 
         return self + negOther
     
-    def __eq__(self, other: 'Polinomio') -> bool:
+    def __eq__(self, other) -> bool:
         #Assume que ambos não tem coeficiente líderes 0.
-        if not isinstance(Polinomio):
+        if not isinstance(other, Polinomio):
             return NotImplemented
         return other._values == self._values
 
@@ -170,13 +196,15 @@ class Polinomio:
         if divisor.degree < 0 or abs(divisor._values[0]) < self.TOLERANCE:
             raise ValueError("Cannot divide by the zero polynomial.")
 
+        newDomain = safe_intersect(self.domain, divisor.domain)
+
         if self.degree < divisor.degree:
-            return Polinomio([0.0]), Polinomio(self._values)
+            return Polinomio([0.0], newDomain), Polinomio(self._values, newDomain)
         
         if divisor.degree == 0:
             constante_divisor = divisor._values[0]
             qCoeffs = [c / constante_divisor for c in self._values]
-            return Polinomio(qCoeffs), Polinomio([0.0])
+            return Polinomio(qCoeffs, newDomain), Polinomio([0.0], newDomain)
 
         mainDivisor = divisor._values[0]
         divisorDegree = divisor.degree
@@ -203,9 +231,9 @@ class Polinomio:
             remainder = remainder - thermToSub 
 
         if remainder.degree < 0:
-            remainder = Polinomio([0.0])
+            remainder = Polinomio([0.0], newDomain)
 
-        return Polinomio(quotientCoeffs), remainder
+        return Polinomio(quotientCoeffs, newDomain), remainder
     
     def _getPNeg(self) -> 'Polinomio':
         """
@@ -222,7 +250,7 @@ class Polinomio:
             else:
                 PNegCoeffs.append(coeff)
                 
-        return Polinomio(PNegCoeffs)
+        return Polinomio(PNegCoeffs, self.domain)
     
     def getRealRootBounds(self) -> tuple[float, float]:
         """
@@ -255,32 +283,29 @@ class Polinomio:
         
         return l, L
 
-def diffPol(pol: Polinomio) -> Polinomio:
-    """
-        Retorna a derivada de um polinomio.
+    def diff(self) -> 'Polinomio':
+        """
+            Retorna a derivada de um polinomio.
 
-        Args:
-            pol (Polinomio): Polinomio a ser derivado.
+            Returns:
+                Polinomio: Polinomio derivado
 
-        Returns:
-            Polinomio: Polinomio derivado
+            Examples:
+                >>> pol = Polinomio([-3.0,2.0,4.0])
+                >>> dPol = pol.diff()
+                >>> print(dPol)
+                [-6.0,2.0]
+        """
 
-        Examples:
-            >>> pol = Polinomio([-3.0,2.0,4.0])
-            >>> dPol = diffPol(pol)
-            >>> print(dPol)
-            [-6.0,2.0]
-    """
+        if len(self) <= 1:
+            return Polinomio([0])
+        
+        derivative = []
 
-    if len(pol) <= 1:
-        return Polinomio([0])
-    
-    derivative = []
+        for i in range(self.degree):
+            derivative.append(self[i]*(self.degree-i))
 
-    for i in range(pol.degree):
-        derivative.append(pol[i]*(pol.degree-i))
-
-    return Polinomio(derivative)
+        return Polinomio(derivative, self.domain)
 
 def lambdify(P: 'Polinomio') -> Callable[[float], float]:
     """
@@ -304,16 +329,22 @@ def lambdify(P: 'Polinomio') -> Callable[[float], float]:
     return func_wrapper
 
 if __name__ == "__main__":
-    pol = Polinomio([2,5,4,8,5,-3.0,2.0,4.0])
-    p1 = Polinomio([4,6,8])
-    p2 = Polinomio([2,3,4])
+    #Deve ignorar o primeiro coeficiente pois para o epsilon de máquina ele é zero.
+    pol = Polinomio([0.0000000000001, 2,5,4,8,5,-3.0,2.0,4000])
+    p1 = Polinomio([4,6,8], Interval(1,4))
+    p2 = Polinomio([2,3,4], Interval(5,6))
 
     p3 = p1.divideBy(p2)
+
+    print(p3[0].domain)
 
     print(p2*2 - p1)
     print(p3)
 
-    dPol = diffPol(pol)
+    print(pol)
+    dPol = pol.diff()
     print(dPol)
+    print(pol.prime(1))
+    print(dPol.domain)
 
     print(p2.evaluate(1))
