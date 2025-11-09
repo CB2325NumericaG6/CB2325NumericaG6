@@ -8,11 +8,6 @@ from CB2325NumericaG6.interpolacao import (
     linear_interp,
     PiecewiseLinearFunction,
 )
-
-# ------------------------------
-# TESTES DE FUNÇÕES INDIVIDUAIS
-# ------------------------------
-
 def test_poly_interp_basic():
     x = [0, 1, 2]
     y = [1, 3, 7]
@@ -21,12 +16,12 @@ def test_poly_interp_basic():
     assert f(0) == 1
     assert f(1) == 3
     assert f(2) == 7
-
+    
 def test_poly_interp_invalid_inputs():
     with pytest.raises(ValueError):
         poly_interp([1], [2])
     with pytest.raises(ValueError):
-        poly_interp([1,2,3], [2,3])  # tamanhos diferentes
+        poly_interp([1,2,3], [2,3])  #tamanhos diferentes
 
 
 def test_linear_interp_and_piecewise_eval():
@@ -42,7 +37,7 @@ def test_linear_interp_invalid_inputs():
     with pytest.raises(ValueError):
         linear_interp([0], [1])
     with pytest.raises(ValueError):
-        linear_interp([0,1,2], [1,2])  # tamanhos diferentes
+        linear_interp([0,1,2], [1,2])  #tamanhos diferentes
 
 
 def test_piecewise_prime_inside_interval():
@@ -59,7 +54,7 @@ def test_piecewise_prime_out_of_domain():
     with pytest.raises(ValueError):
         f.prime(-0.1)
     with pytest.raises(ValueError):
-        f.prime(1.0)   # nos de interpolação: derivada indefinida
+        f.prime(1.0) # nos de interpolação:derivada indefinida
 
 def test_piecewise_makePolynomialSegment():
     x1, x2 = 0, 2
@@ -71,7 +66,7 @@ def test_piecewise_makePolynomialSegment():
     assert abs(pol(1) - 3) < 1e-10
     assert abs(pol(2) - 5) < 1e-10
     with pytest.raises(ValueError):
-        f.makePolynomialSegment(1,1,2,2)  # x1==x2 → erro
+        f.makePolynomialSegment(1,1,2,2)  # x1==x2 -→ erro
 
 def test_piecewise_find_root_segments():
     x = [0, 1, 2, 3]
@@ -90,7 +85,6 @@ def test_piecewise_find_root_segments_with_zeros():
     # O ponto 0 e 2 são raízes exatas
     assert (0,0) in roots
     assert (2,2) in roots
-
 
 def test_hermite_interp_basic():
     x = [0, 1]
