@@ -1,7 +1,7 @@
 from typing import Callable, Sequence, Optional, List, Tuple
 from .core import RealFunction, Interval
 from .polinomios import Polinomio
-from .raizes import bissecao
+from .raizes import bisseccao
 
 Interpolator = Callable[[float], float]
 
