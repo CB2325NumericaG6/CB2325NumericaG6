@@ -187,7 +187,18 @@ class PiecewiseLinearFunction(RealFunction):
             
         return segments
 
-    def plot(self, pontos: int = 100) -> tuple[plt.Figure, plt.Axes]:
+    def plot(self) -> tuple[plt.Figure, plt.Axes]:
+        """
+        Plota o gráfico da função linear por partes.
+        Returns:
+            tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+        Examples:
+            >>> x = [0, 2, 4, 5]
+            >>> y = [1, 2, 0, 4]
+            >>> p = linear_interp(x, y)
+            >>> fig, ax = p.plot()
+            >>> plt.show()
+        """
         fig, ax = plt.subplots()
         # Plota as linhas que interligam os pontos
         ax.plot(self.X, self.Y, linestyle='-', color='blue', label='Função Linear por Partes')

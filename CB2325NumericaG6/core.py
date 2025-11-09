@@ -103,6 +103,21 @@ class RealFunction:
         return self.eval_safe(x)
     
     def plot(self, intervalo: Optional[Interval] = None, pontos: int = 100) -> tuple[plt.Figure, plt.Axes]:
+        """
+        Plota o gráfico da função real no intervalo especificado. Caso nenhum intervalo seja fornecido,
+        será utilizado o domínio da função. Se o domínio da função também for None,uma exceção será 
+        levantada. O número de pontos no gráfico poder ser ajustado, sendo 100 o padrão.
+
+        Args:
+            intervalo (Optional[Interval], optional): Intervalo para plotagem. Default é None.
+            pontos (int, optional): Número de pontos no gráfico. Default é 100.
+        Returns:
+            tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+        Examples:
+            >>> f = Polinomio([1, -3, 2], Interval(0, 5))  # Representa P(x) = x^2 - 3x + 2
+            >>> fig, ax = f.plot(Interval(0, 5), pontos=200)
+            >>> plt.show()
+        """
         dominio = self.domain
         if intervalo is not None:
             dominio = intervalo
