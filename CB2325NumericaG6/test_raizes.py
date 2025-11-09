@@ -79,13 +79,12 @@ def test_plot_newton_raphson_retorna_figure(monkeypatch):
     assert isinstance(fig, Figure)
 
 def test_sturm_conta_raizes_corretamente():
-    # (x-1)(x+2) = x^2 + x - 2  -> raízes: -2 e 1
     P = Polinomio([1.0, 1.0, -2.0])
     assert sturm(P, -3.0, 3.0) == 2
     assert sturm(P, -0.5, 0.5) == 0
 
 def test_sturm_intervalo_invalido():
-    P = Polinomio([1.0, 0.0, -1.0])  # x^2 - 1
+    P = Polinomio([1.0, 0.0, -1.0])  
     with pytest.raises(ValueError):
         _ = sturm(P, 1.0, 1.0)
     with pytest.raises(ValueError):
