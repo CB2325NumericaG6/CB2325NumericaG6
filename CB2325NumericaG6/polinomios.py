@@ -329,6 +329,7 @@ def lambdify(P: 'Polinomio') -> Callable[[float], float]:
     return func_wrapper
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
     #Deve ignorar o primeiro coeficiente pois para o epsilon de máquina ele é zero.
     pol = Polinomio([0.0000000000001, 2,5,4,8,5,-3.0,2.0,4000])
     p1 = Polinomio([4,6,8], Interval(1,4))
@@ -348,3 +349,7 @@ if __name__ == "__main__":
     print(dPol.domain)
 
     print(p2.evaluate(1))
+
+    polinomio = Polinomio([1, 1, -3, 2], Interval(-6,6))  # Representa P(x) = x^2 - 3x + 2
+    polinomio.plot(Interval(-2, 4), pontos=200)
+    plt.show()

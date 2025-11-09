@@ -102,8 +102,17 @@ class RealFunction:
     def __call__(self, x) -> float:
         return self.eval_safe(x)
     
-    def plot(self):
-        return NotImplementedError
+    def plot(self, intervalo: Optional[Interval] = None, pontos: int = 100) -> tuple[plt.Figure, plt.Axes]:
+        dominio = self.domain
+        if intervalo is not None:
+            dominio = intervalo
+        if dominio is None:
+            raise Exception("Domínio da função não está definido.")
+        fig, ax = plt.subplots()
+        X = linspace(dominio.min, dominio.max, pontos)
+        Y = [self(val) for val in X]
+        ax.plot(X,Y)
+        return fig, ax
     
 def linspace(min: float, max: float, points: int) -> list[float]:
     """
