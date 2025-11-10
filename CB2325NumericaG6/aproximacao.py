@@ -1,7 +1,7 @@
 import math
 import statistics
-
-def ajuste_linear(x: list[float], y: list[float]) -> tuple[float, float]:
+from polinomios import Polinomio
+def ajuste_linear(x: list[float], y: list[float]) -> Polinomio:
     """
     Ajusta y = a*x + b aos pontos (x, y) por mínimos quadrados (erro vertical).
 
@@ -33,7 +33,7 @@ def ajuste_linear(x: list[float], y: list[float]) -> tuple[float, float]:
 
     a = cov_xy / var_x
     b = my - a * mx
-    return a, b
+    return Polinomio([a,b])
 
 
 if __name__ == "__main__":
