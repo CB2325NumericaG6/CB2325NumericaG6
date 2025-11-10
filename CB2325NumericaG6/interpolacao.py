@@ -74,19 +74,20 @@ class HermiteInterpolation(RealFunction):
 
 def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval]=None) -> HermiteInterpolation:
     """
-    Creates a Hermite polynomial interpolation function from a set of X,Y coordinates
-    and their derivatives.
+    Cria uma função de interpolação polinomial de Hermite a partir de um conjunto de coordenadas X, Y
+    e de suas derivadas.
 
     Args:
-        x (Sequence[float]): X-axis coordinates.
-        y (Sequence[float]): Y-axis values at the coordinates.
-        dy (Sequence[float]): Derivative values at the coordinates.
-    
+        x (Sequence[float]): Coordenadas no eixo X.
+        y (Sequence[float]): Valores de Y nas respectivas coordenadas.
+        dy (Sequence[float]): Valores das derivadas nas respectivas coordenadas.
+        domain (Optional[Interval]): domínio da função (opcional)
+        
     Returns:
-        Interpolator: A callable function that evaluates the Hermite interpolating polynomial.
-    
+        HermiteInterpolation: Uma classe chamável que avalia o polinômio interpolador de Hermite.
+        
     Raises:
-        ValueError: If x, y, dy have different lengths or contain fewer than two points.
+        ValueError: Se x, y e dy tiverem comprimentos diferentes ou contiverem menos de dois pontos.
     """
     if len(x) != len(y) or len(x) != len(dy) or len(x) < 2:
         raise ValueError(
@@ -137,19 +138,20 @@ class PolinomialInterpolation(RealFunction):
  
 def poly_interp(x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None) -> PolinomialInterpolation:
     """
-    Creates a polynomial interpolation function from a set of X and Y coordinates,
-    using the Lagrange form.
+    Cria uma função de interpolação polinomial a partir de um conjunto de coordenadas X e Y,
+    utilizando a forma de Lagrange.
 
     Args:
-        x (Sequence[float]): Sequence of X-axis coordinates.
-        y (Sequence[float]): Sequence of Y-axis coordinates.
+        x (Sequence[float]): Sequência das coordenadas no eixo X.
+        y (Sequence[float]): Sequência dos valores correspondentes no eixo Y.
+        domain (Optional[Interval]): domínio da função (opcional)
 
     Returns:
-        Interpolator: A callable function that evaluates the interpolating polynomial
-        for any given float input.
+        PolinomialInterpolation: Uma classe chamável que avalia o polinômio interpolador
+        para qualquer valor de entrada do tipo float.
 
     Raises:
-        ValueError: If x and y have different lengths or contain fewer than two points.
+        ValueError: Se x e y tiverem comprimentos diferentes ou contiverem menos de dois pontos.
     """
     if len(x) != len(y) or len(x) < 2:
         raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
