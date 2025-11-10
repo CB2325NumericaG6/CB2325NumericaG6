@@ -1,7 +1,7 @@
 from typing import Callable, Sequence, Optional, List, Tuple
 from .core import RealFunction, Interval
 from .polinomios import Polinomio
-from .raizes import bissecao
+import matplotlib.pyplot as plt
 
 Interpolator = Callable[[float], float]
 
@@ -186,6 +186,34 @@ class PiecewiseLinearFunction(RealFunction):
             segments.append((self.X[-1], self.X[-1]))
             
         return segments
+
+    def plot(self) -> tuple[plt.Figure, plt.Axes]:
+        """
+        Plota o gráfico da função linear por partes.
+        Returns:
+            tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+        Examples:
+            >>> x = [0, 2, 4, 5]
+            >>> y = [1, 2, 0, 4]
+            >>> p = linear_interp(x, y)
+            >>> fig, ax = p.plot()
+            >>> plt.show()
+        """
+        fig, ax = plt.subplots()
+        # Plota as linhas que interligam os pontos
+        ax.plot(self.X, self.Y, linestyle='-', color='blue', label='Função Linear por Partes')
+
+        # Plota os pontos de dados individuais
+        ax.plot(self.X, self.Y, 'o', color='red', label='Pontos de Dados') # 'o' para marcadores de círculo
+
+        ax.set_title("Gráfico da Função Linear por Partes")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+        ax.grid(True)
+        ax.legend() # Mostra a legenda dos elementos plotados
+
+        return fig, ax
+        
     
 def linear_interp(x: Sequence, y: Sequence) -> PiecewiseLinearFunction:
     """Cria uma função de interpolação (e extrapolação)s linear a partir de um par de sequências de coordenadas X,Y
@@ -213,3 +241,17 @@ def linear_interp(x: Sequence, y: Sequence) -> PiecewiseLinearFunction:
         raise ValueError("There must be atleast 2 points")
     
     return PiecewiseLinearFunction(x, y)
+
+
+if __name__ == "__main__":
+    x = [0, 1, 2, 3, 4]
+    y = [1, 3, 2, 5, 4]
+    plf = linear_interp(x, y)
+    fig, ax = plf.plot()
+    plt.show()
+
+    a = [-1, 0, 1, 2]
+    b = [1, -2, 0, 2]
+    plf2 = linear_interp(a, b)
+    fig2, ax2 = plf2.plot()
+    plt.show()
