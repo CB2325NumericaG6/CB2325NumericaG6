@@ -3,86 +3,163 @@ from .core import RealFunction, Interval
 from .polinomios import Polinomio
 import matplotlib.pyplot as plt
 
-Interpolator = Callable[[float], float]
+class HermiteInterpolation(RealFunction):
+    def __init__(self, x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval] = None):
+        self.X = x
+        self.Y = y
+        self.DY = dy
+        self.domain = domain 
+        self.f = self._coeficientes() # O Callable principal para RealFunction
 
-def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> Interpolator:
+    def _coeficientes(self):
+        if len(self.X) != len(self.Y) or len(self.X) != len(self.DY) or len(self.X) < 2:
+            raise ValueError("x, y, dy devem ter mesmo tamanho e conter ao menos dois pontos.")
+
+        n = len(self.X)
+        coef = [0.0 for _ in range(2*n)]
+
+        for i in range(n):
+            Li = [1.0]
+            denom = 1.0
+            for j in range(n):
+                if j != i:
+                    novo = [0.0 for _ in range(len(Li)+1)]
+                    for k in range(len(Li)):
+                        novo[k] -= Li[k] * self.X[j]
+                        novo[k+1] += Li[k]
+                    Li = novo
+                    denom *= (self.X[i] - self.X[j])
+            Li = [a / denom for a in Li]
+
+            Li_prime = sum(1 / (self.X[i] - self.X[m]) for m in range(n) if m != i)
+
+            Li2 = [0.0]*(2*len(Li)-1)
+            for p in range(len(Li)):
+                for q in range(len(Li)):
+                    Li2[p+q] += Li[p]*Li[q]
+
+            Ki = [0.0]*(len(Li2)+1)
+            for k in range(len(Li2)):
+                Ki[k] -= Li2[k] * self.X[i]
+                Ki[k+1] += Li2[k]
+
+            Hi = [0.0]*(len(Li2)+1)
+            for k in range(len(Li2)):
+                Hi[k] += Li2[k]
+            for k in range(len(Li2)):
+                Hi[k] -= 2*Li_prime*Li2[k]*self.X[i]
+                Hi[k+1] += 2*Li_prime*Li2[k]
+
+            termo = [0.0]*max(len(Hi), len(Ki))
+            for k in range(len(Hi)):
+                termo[k] += self.Y[i]*Hi[k]
+            for k in range(len(Ki)):
+                termo[k] += self.DY[i]*Ki[k]
+
+            for k in range(len(termo)):
+                coef[k] += termo[k]
+
+        while len(coef) > 1 and abs(coef[-1]) < 1e-14:
+            coef.pop()
+
+        return Polinomio(coef[::-1])
+    
+    def evaluate(self, v: float) -> float:
+        if len(self.X) != len(self.Y) or len(self.X) < 2:
+            raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
+        return self.f.evaluate(v)
+
+
+
+
+def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval]=None) -> HermiteInterpolation:
     """
-    Creates a Hermite polynomial interpolation function from a set of X,Y coordinates
-    and their derivatives.
+    Cria uma função de interpolação polinomial de Hermite a partir de um conjunto de coordenadas X, Y
+    e de suas derivadas.
 
     Args:
-        x (Sequence[float]): X-axis coordinates.
-        y (Sequence[float]): Y-axis values at the coordinates.
-        dy (Sequence[float]): Derivative values at the coordinates.
-    
+        x (Sequence[float]): Coordenadas no eixo X.
+        y (Sequence[float]): Valores de Y nas respectivas coordenadas.
+        dy (Sequence[float]): Valores das derivadas nas respectivas coordenadas.
+        domain (Optional[Interval]): domínio da função (opcional)
+        
     Returns:
-        Interpolator: A callable function that evaluates the Hermite interpolating polynomial.
-    
+        HermiteInterpolation: Uma classe chamável que avalia o polinômio interpolador de Hermite.
+        
     Raises:
-        ValueError: If x, y, dy have different lengths or contain fewer than two points.
+        ValueError: Se x, y e dy tiverem comprimentos diferentes ou contiverem menos de dois pontos.
     """
     if len(x) != len(y) or len(x) != len(dy) or len(x) < 2:
         raise ValueError(
             f"x, y, dy must have the same length and contain at least two points "
         )
+
+    return HermiteInterpolation(x, y, dy, domain)
+ 
+
+
+class PolinomialInterpolation(RealFunction):
+    def __init__(self, x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None):
+        self.X = x
+        self.Y = y
+        self.domain = domain
+        self.f = self._coeficientes() # O Callable principal para RealFunction
+
+    def _coeficientes(self):
+        n = len(self.X)
+        coef = [0.0 for _ in range(n)]
+
+        for i in range(n): 
+            Li = [1.0]
+            denom = 1.0
+
+            for j in range(n): 
+                if i != j:
+                    novo = [0.0 for _ in range(len(Li) + 1)]
+                    for k in range(len(Li)):
+                        novo[k]     += Li[k]          
+                        novo[k + 1] -= Li[k] * x[j]
+                    Li = novo
+                    denom *= (self.X[i] - self.X[j])
+
+            Li = [a * (self.Y[i] / denom) for a in Li]
+            for k in range(len(Li)):
+                coef[k] += Li[k]
+
+        return Polinomio(coef) 
+
+    def evaluate(self, v: float) -> float:
+        if len(self.X) != len(self.Y) or len(self.X) < 2:
+            raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
+        return self.f.evaluate(v)
     
-    n = len(x)
+    
 
-    def P(X: float) -> float:
-        total = 0.0
-        for i in range(n):
-            # Lagrange polynome L_i(x)
-            Li = 1.0
-            for j in range(n):
-                if j != i:
-                    Li *= (X - x[j]) / (x[i] - x[j])
-            
-            # deff of L_i in x_i
-            Li_prime = sum(
-                1 / (x[i] - x[m]) for m in range(n) if m != i
-            )
-            
-            # Hermite polynomial base for H_i and K_i
-            Hi = (1 - 2*Li_prime*(X - x[i])) * Li**2
-            Ki = (X - x[i]) * Li**2
-            
-            total += y[i]*Hi + dy[i]*Ki
-        return total
-
-    return P
-
-def poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator:
+ 
+def poly_interp(x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None) -> PolinomialInterpolation:
     """
-    Creates a polynomial interpolation function from a set of X and Y coordinates,
-    using the Lagrange form.
+    Cria uma função de interpolação polinomial a partir de um conjunto de coordenadas X e Y,
+    utilizando a forma de Lagrange.
 
     Args:
-        x (Sequence[float]): Sequence of X-axis coordinates.
-        y (Sequence[float]): Sequence of Y-axis coordinates.
+        x (Sequence[float]): Sequência das coordenadas no eixo X.
+        y (Sequence[float]): Sequência dos valores correspondentes no eixo Y.
+        domain (Optional[Interval]): domínio da função (opcional)
 
     Returns:
-        Interpolator: A callable function that evaluates the interpolating polynomial
-        for any given float input.
+        PolinomialInterpolation: Uma classe chamável que avalia o polinômio interpolador
+        para qualquer valor de entrada do tipo float.
 
     Raises:
-        ValueError: If x and y have different lengths or contain fewer than two points.
+        ValueError: Se x e y tiverem comprimentos diferentes ou contiverem menos de dois pontos.
     """
     if len(x) != len(y) or len(x) < 2:
         raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
     
-    n = len(x)
+    return PolinomialInterpolation(x, y, domain)
 
-    def P(X: float) -> float:
-        total = 0.0
-        for i in range(n):
-            Li = 1.0
-            for j in range(n):
-                if i != j:
-                    Li *= (X - x[j]) / (x[i] - x[j])
-            total += y[i] * Li
-        return total
 
-    return P
+
 
 class PiecewiseLinearFunction(RealFunction):
     def __init__(self, x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None):
@@ -252,6 +329,98 @@ if __name__ == "__main__":
 
     a = [-1, 0, 1, 2]
     b = [1, -2, 0, 2]
-    plf2 = linear_interp(a, b)
+    plf2 = linear_interp(a, b)  
     fig2, ax2 = plf2.plot()
+    plt.show()
+
+    x_poly = [0, 1, 2, 3]
+    y_poly = [1, 2, 0, 5]
+
+    # Usando a função poly_interp
+    P = poly_interp(x_poly, y_poly)
+    X_plot = [i / 10 for i in range(0, 31)]  # domínio para visualização
+    Y_plot = [P(x) for x in X_plot]
+
+
+    plt.figure()
+    plt.plot(X_plot, Y_plot, label="Interpolador Lagrange (função)")
+    plt.scatter(x_poly, y_poly, color="red", zorder=5, label="Pontos originais")
+    plt.title("Interpolação Polinomial via Função poly_interp")
+    plt.xlabel("x")
+    plt.ylabel("P(x)")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+
+    # --- Dados de exemplo ---
+    x = [0.0, 1.0, 2.0]
+    y = [1.0, 2.0, 0.0]
+    dy = [0.0, 1.0, -1.0]
+
+    # --- Cria interpolador de Hermite ---
+    P = hermite_interp(x, y, dy)
+
+    # --- Gera pontos para o gráfico ---
+    X_plot = [i / 20 for i in range(-5, 61)]  # de -0.25 até 3.05
+    Y_plot = [P.evaluate(X) for X in X_plot]
+
+    # --- Plota ---
+    plt.figure()
+    plt.plot(X_plot, Y_plot, label="Interpolador Hermite", color="blue")
+    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
+
+    # Desenha setinhas indicando derivadas (slopes)
+    for xi, yi, dyi in zip(x, y, dy):
+        plt.arrow(
+            xi, yi, 0.3, 0.3 * dyi, 
+            head_width=0.05, head_length=0.05,
+            fc='green', ec='green', zorder=6
+        )
+
+    plt.title("Interpolação de Hermite")
+    plt.xlabel("x")
+    plt.ylabel("P(x)")
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+    import numpy as np
+
+    # --- Dados de entrada baseados em f(x) = sin(x) ---
+    x = [0.0, np.pi/2, np.pi]
+    y = [np.sin(xi) for xi in x]  # [0.0, 1.0, 0.0]
+    dy = [np.cos(xi) for xi in x] # [1.0, 0.0, -1.0]
+
+    # --- Cria interpolador de Hermite ---
+    P = HermiteInterpolation(x, y, dy)
+
+    # --- Gera pontos para o gráfico ---
+    # Vamos plotar de -0.5 a 4.0
+    X_plot = np.linspace(-0.5, 4.0, 100)
+    Y_plot = [P.evaluate(X) for X in X_plot]
+
+    # Gera a curva real do sin(x) para comparação
+    Y_real = np.sin(X_plot)
+
+    # --- Plota ---
+    plt.figure()
+    plt.plot(X_plot, Y_plot, label="Interpolador Hermite P(x)", color="blue")
+    plt.plot(X_plot, Y_real, label="Função Real (sin(x))", color="green", linestyle="--")
+    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
+
+    # Desenha setinhas indicando derivadas (slopes)
+    for xi, yi, dyi in zip(x, y, dy):
+        plt.arrow(
+            xi, yi, 0.4, 0.4 * dyi, 
+            head_width=0.05, head_length=0.05,
+            fc='orange', ec='orange', zorder=6
+        )
+
+    plt.title("Interpolação de Hermite (em sin(x))")
+    plt.xlabel("x")
+    plt.ylabel("P(x)")
+    plt.grid(True)
+    plt.legend()
+    plt.ylim(-1.5, 1.5) # Ajusta o zoom vertical
     plt.show()
