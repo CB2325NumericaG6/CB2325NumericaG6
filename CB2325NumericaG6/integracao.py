@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+import numpy as np
 from typing import Callable
 
 
@@ -30,3 +32,28 @@ def integral(f:Callable, start: float, end: float, divisions: int) -> float:
         i += Xincrement
     
     return sumVal
+
+def plot_integral(f: Callable, start: float, end: float, divisions: int) -> tuple[plt.Figure, plt.Axes]:
+    valor_integral = integral(f, start, end, divisions)
+    
+    fig, ax = plt.subplots()
+    
+    # Função
+    x = np.linspace(start, end, 1000)
+    y = f(x)
+    ax.plot(x, y, 'b-')
+    
+    # Trapézios
+    x_div = np.linspace(start, end, divisions + 1)
+    y_div = f(x_div)
+    
+    for i in range(divisions):
+        ax.fill([x_div[i], x_div[i], x_div[i+1], x_div[i+1]], 
+                [0, y_div[i], y_div[i+1], 0], 
+                'orange', alpha=0.4)
+    
+    ax.plot(x_div, y_div, 'ro', markersize=3)
+    ax.set_title(f"Integral: {valor_integral:.6f}")
+    ax.grid(True)
+    
+    return fig, ax
