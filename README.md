@@ -17,8 +17,8 @@ Feito por:
 
 <br/>
 
-# Versão do projeto: v0.0.4
-Added linear interpolation
+# Versão do projeto: v0.0.5
+Added erros/raizes/interpolacao methods
 
 # Documentação
 
@@ -47,7 +47,7 @@ Esse módulo é direcionado a funções de aproximação numérica.
 
 `ajuste_linear(x, y)`:
 
-[❌] Status: Não implementado
+[✅] Status: Concluído
 
 ```python
 ajuste_linear(x: list[float], y: list[float]) -> Polinomio
@@ -60,6 +60,21 @@ As listas devem ter tamanhos iguais, pois cada ponto Y corresponde ao respectivo
 
 **Retorno:**
 A função retorna o ajuste linear $y = ax + b$ da série de pontos por meio de um `Polinomio` [a,b]
+
+`ajuste_polinomial(x, y, n)`:
+
+[✅] Status: Concluído
+
+```python
+ajuste_polinomial(x: list[float], y: list[float], n: int) -> Polinomio
+```
+**Entrada:**
+
+A função recebe duas listas de variáveis, uma de coordenadas X e outra de coordenadas Y correspondentes e o inteiro n que diz o grau do polinomilo.
+As listas devem ter tamanhos iguais, pois cada ponto Y corresponde ao respectivo ponto X.
+
+**Retorno:**
+A função retorna o ajuste polinomial $y = a_0*x^n + a_1*x^(n-1) + ... + a_n$ da série de pontos por meio de um `Polinomio`.
 
 # Core (.core)
 
@@ -175,7 +190,26 @@ erro_absoluto(valor_real, valor_aprox)
 
 `erro_relativo(valor_real, valor_aproximado)`:
 
-[❌] Status: Não implementado
+Calcula o erro relativo entre um ou mais valores reais e aproximados.    
+Esta função é 'vectorizada': ela aceita tanto números únicos
+quanto arrays NumPy.
+
+Fórmula: er = |valor_real - valor_aprox| / |valor_real|
+
+[✅] Status: Concluído
+
+```python
+erro_absoluto(valor_real, valor_aprox)
+```
+
+**Entrada:**
+- valor_real (float ou np.ndarray): O valor exato ou de referência.
+- valor_aprox (float ou np.ndarray): O valor obtido ou medido.
+
+**Retorno:**
+- float ou np.ndarray: O erro relativo.
+
+[✅] Status: Concluído
 
 # Integração (.integracao)
 
@@ -232,7 +266,7 @@ Módulo que compõe as funções de interpolação.
 
 `linear_interp(x, y)`, `poly_interp(x, y)`
 
-[⚠️] Status: Necessária tradução do docstrings
+[✅] Status: Concluído
 
 ```python
 linear_interp(x: Sequence, y: Sequence) -> PiecewiseLinearFunction
@@ -250,7 +284,7 @@ poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator
 
 `hermite_interp(x, y, dy)`
 
-[⚠️] Status: Necessária tradução do docstrings
+[✅] Status: Concluído
 
 ```python
 hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> Interpolator
