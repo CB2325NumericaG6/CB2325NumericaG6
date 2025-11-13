@@ -2,10 +2,14 @@ from typing import Callable, Sequence, Optional, List, Tuple
 from core import RealFunction, Interval
 from polinomios import Polinomio
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import numpy as np
 
 class HermiteInterpolation(RealFunction):
     def __init__(self, x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval] = None):
+        if len(x) != len(y) or len(x) != len(dy) or len(x) < 2:
+            raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
         self.X = x
         self.Y = y
         self.DY = dy
@@ -13,9 +17,6 @@ class HermiteInterpolation(RealFunction):
         self.f = self._coeficientes() # O Callable principal para RealFunction
 
     def _coeficientes(self):
-        if len(self.X) != len(self.Y) or len(self.X) != len(self.DY) or len(self.X) < 2:
-            raise ValueError("x, y, dy devem ter mesmo tamanho e conter ao menos dois pontos.")
-
         n = len(self.X)
         coef = [0.0 for _ in range(2*n)]
 
@@ -177,12 +178,14 @@ def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float], 
 
 class PolinomialInterpolation(RealFunction):
     def __init__(self, x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None):
+        if len(x) != len(y) or len(x) < 2:
+            raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
         self.X = x
         self.Y = y
         self.domain = domain
         self.f = self._coeficientes() # O Callable principal para RealFunction
 
-    def _coeficientes(self):
+    def _coeficientes(self) -> Polinomio:
         n = len(self.X)
         coef = [0.0 for _ in range(n)]
 
@@ -204,11 +207,6 @@ class PolinomialInterpolation(RealFunction):
                 coef[k] += Li[k]
 
         return Polinomio(coef) 
-
-    def evaluate(self, v: float) -> float:
-        if len(self.X) != len(self.Y) or len(self.X) < 2:
-            raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
-        return self.f.evaluate(v)
 
     def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[plt.Figure, plt.Axes]:
         """
@@ -302,7 +300,7 @@ class PiecewiseLinearFunction(RealFunction):
         self.domain = domain if domain else Interval(min(x), max(x))
         self.f = self.evaluate # O Callable principal para RealFunction
 
-    def makePolynomialSegment(self, x1, x2, y1, y2) -> Polinomio:
+    def criar_segmento_polinomial(self, x1, x2, y1, y2) -> Polinomio:
         if x1 == x2:
             raise ValueError("Pontos x1 e x2 são o mesmo. Não é possível criar um segmento.")
 
@@ -376,7 +374,7 @@ class PiecewiseLinearFunction(RealFunction):
 
         return y1 + (v - x1) * ((y2 - y1) / (x2 - x1))
     
-    def find_root_segments(self) -> List[Tuple[float, float]]:
+    def encontrar_segmentos_raiz(self) -> List[Tuple[float, float]]:
         """
         Retorna uma lista de intervalos [a, b] onde f(a) * f(b) < 0.
         """
@@ -397,8 +395,8 @@ class PiecewiseLinearFunction(RealFunction):
             segments.append((self.X[-1], self.X[-1]))
             
         return segments
-
-    def plot(self) -> tuple[plt.Figure, plt.Axes]:
+    
+    def plot(self, *args, **kwargs) -> tuple[Figure, Axes]:
         """
         Plota o gráfico da função linear por partes.
         Returns:

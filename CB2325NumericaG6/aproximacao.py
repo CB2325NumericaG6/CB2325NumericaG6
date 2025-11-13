@@ -1,12 +1,18 @@
 import math
 import statistics
+<<<<<<< HEAD
 from core import Interval
 from typing import Optional
 from polinomios import Polinomio
 import numpy as np
 import matplotlib.pyplot as plt
+=======
+from .polinomios import Polinomio
+import numpy as np
+from typing import Sequence
+>>>>>>> c33c04057f69b646ba94bbda36bc1d06dd0298f6
 
-def ajuste_linear(x: list[float], y: list[float]) -> Polinomio:
+def ajuste_linear(x: Sequence, y: Sequence) -> Polinomio:
     """
     Ajusta y = a*x + b aos pontos (x, y) por mínimos quadrados (erro vertical).
 
@@ -40,7 +46,7 @@ def ajuste_linear(x: list[float], y: list[float]) -> Polinomio:
     b = my - a * mx
     return Polinomio([a,b])
 
-def ajuste_polinomial(x: list[float], y: list[float], n = 2, precisao = 5) -> Polinomio:
+def ajuste_polinomial(x: Sequence, y: Sequence, n = 2, precisao = 5) -> Polinomio:
     """
     Ajusta y = a_0*x^n + a_1*x^(n-1) + ... + a_n aos pontos (x,y) por mínimos quadrados (erro vertical)
 
