@@ -47,9 +47,8 @@ class HermiteInterpolation(RealFunction):
             for k in range(len(Li2)):
                 Hi[k] += Li2[k]
             for k in range(len(Li2)):
-                Hi[k] -= 2*Li_prime*Li2[k]*self.X[i]
-                Hi[k+1] += 2*Li_prime*Li2[k]
-
+                Hi[k] += 2*Li_prime*Li2[k]*self.X[i]  
+                Hi[k+1] -= 2*Li_prime*Li2[k]           
             termo = [0.0]*max(len(Hi), len(Ki))
             for k in range(len(Hi)):
                 termo[k] += self.Y[i]*Hi[k]
@@ -63,7 +62,7 @@ class HermiteInterpolation(RealFunction):
             coef.pop()
 
         return Polinomio(coef[::-1])
-    
+        
     def evaluate(self, v: float) -> float:
         if len(self.X) != len(self.Y) or len(self.X) < 2:
             raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
@@ -118,7 +117,7 @@ class PolinomialInterpolation(RealFunction):
                     novo = [0.0 for _ in range(len(Li) + 1)]
                     for k in range(len(Li)):
                         novo[k]     += Li[k]          
-                        novo[k + 1] -= Li[k] * x[j]
+                        novo[k + 1] -= Li[k] * self.X[j]
                     Li = novo
                     denom *= (self.X[i] - self.X[j])
 
@@ -423,4 +422,36 @@ if __name__ == "__main__":
     plt.grid(True)
     plt.legend()
     plt.ylim(-1.5, 1.5) # Ajusta o zoom vertical
+    plt.show()
+
+    x = [0.0, 1.0, 2.0, 3.0]
+    y = [1.0, 2.0, 4.5, 2.5]
+    dy = [0.0, 1.0, -0.5, 0.5]
+
+    # --- Cria interpolador de Hermite ---
+    P = hermite_interp(x, y, dy)
+
+    # --- Gera pontos para o gráfico ---
+    X_plot = [i / 20 for i in range(-5, 81)]  # de -0.25 até 4.05
+    Y_plot = [P.evaluate(X) for X in X_plot]
+
+    # --- Plota ---
+    plt.figure(figsize=(7, 4))
+    plt.plot(X_plot, Y_plot, label="Interpolador de Hermite", color="blue")
+    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
+
+    # Desenha setinhas indicando derivadas (slopes)
+    for xi, yi, dyi in zip(x, y, dy):
+        plt.arrow(
+            xi, yi, 0.3, 0.3 * dyi,
+            head_width=0.05, head_length=0.05,
+            fc='green', ec='green', zorder=6
+        )
+
+    plt.title("Interpolação de Hermite com 4 pontos")
+    plt.xlabel("x")
+    plt.ylabel("P(x)")
+    plt.grid(True)
+    plt.legend()
+    plt.tight_layout()
     plt.show()
