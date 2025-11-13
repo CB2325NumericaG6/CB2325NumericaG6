@@ -2,9 +2,14 @@ from typing import Callable, Sequence, Optional, List, Tuple
 from .core import RealFunction, Interval
 from .polinomios import Polinomio
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+import numpy as np
 
 class HermiteInterpolation(RealFunction):
     def __init__(self, x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval] = None):
+        if len(x) != len(y) or len(x) != len(dy) or len(x) < 2:
+            raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
         self.X = x
         self.Y = y
         self.DY = dy
@@ -12,9 +17,6 @@ class HermiteInterpolation(RealFunction):
         self.f = self._coeficientes() # O Callable principal para RealFunction
 
     def _coeficientes(self):
-        if len(self.X) != len(self.Y) or len(self.X) != len(self.DY) or len(self.X) < 2:
-            raise ValueError("x, y, dy devem ter mesmo tamanho e conter ao menos dois pontos.")
-
         n = len(self.X)
         coef = [0.0 for _ in range(2*n)]
 
@@ -68,8 +70,85 @@ class HermiteInterpolation(RealFunction):
             raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
         return self.f.evaluate(v)
 
+    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[plt.Figure, plt.Axes]:
+            """
+            Plota o gráfico do polinômio interpolador de Hermite.
 
+            Args:
+                num_points (int): Número de pontos para desenhar a curva do polinômio.
+                margin (float): Percentual da margem a ser adicionada nos eixos x 
+                                além dos pontos de dados min/max (usado apenas se domain=None).
+                domain (Optional[Interval]): Intervalo [min, max] explícito para plotar. 
+                                            Se None, usa o min/max dos pontos X com a margem.
 
+            Returns:
+                tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+            Examples:
+                
+                >>> x_h1 = [0.0, 1.0, 2.0]
+                >>> y_h1 = [1.0, 2.0, 0.0]
+                >>> dy_h1 = [0.0, 1.0, -1.0]
+                >>> P_h1 = hermite_interp(x_h1, y_h1, dy_h1)
+                >>> fig_h1, ax_h1 = P_h1.plot()
+                >>> plt.show()
+            """
+            fig, ax = plt.subplots()
+
+            # --- Gera pontos para a curva ---
+            if domain:
+                # Usa o domínio explícito se fornecido
+                plot_min = domain.min
+                plot_max = domain.max
+            else:
+                # Lógica anterior: calcula o domínio baseado nos pontos e na margem
+                x_min = min(self.X)
+                x_max = max(self.X)
+                span = x_max - x_min
+                
+                if span == 0: # Caso de emergência se os pontos forem idênticos
+                    plot_min = x_min - 1.0
+                    plot_max = x_max + 1.0
+                else:
+                    plot_min = x_min - span * margin
+                    plot_max = x_max + span * margin
+
+            X_plot = np.linspace(plot_min, plot_max, num_points)
+            Y_plot = [self(x) for x in X_plot]
+
+            # --- Plota ---
+            # 1. A curva do polinômio
+            ax.plot(X_plot, Y_plot, label="Interpolador Hermite", color="blue")
+            
+            # 2. Os pontos originais
+            ax.scatter(self.X, self.Y, color="red", zorder=5, label="Pontos originais")
+
+            # 3. As LINHAS das derivadas (em vez de setas)
+            line_length = 0.3 # Comprimento total do segmento de reta
+            segment_half_length = line_length / 2.0
+            first_line = True
+            
+            for xi, yi, dyi in zip(self.X, self.Y, self.DY):
+                label = "Derivadas" if first_line else None
+                
+                # Calcula o início e o fim do segmento de reta
+                x1 = xi - segment_half_length
+                y1 = yi - segment_half_length * dyi
+                
+                x2 = xi + segment_half_length
+                y2 = yi + segment_half_length * dyi
+                
+                # Plota o segmento de reta
+                ax.plot([x1, x2], [y1, y2], color='green', zorder=6, label=label)
+                first_line = False
+
+            # --- Configurações ---
+            ax.set_title("Interpolação de Hermite")
+            ax.set_xlabel("x")
+            ax.set_ylabel("P(x)")
+            ax.grid(True)
+            ax.legend()
+            
+            return fig, ax
 
 def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float], domain: Optional[Interval]=None) -> HermiteInterpolation:
     """
@@ -99,12 +178,14 @@ def hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float], 
 
 class PolinomialInterpolation(RealFunction):
     def __init__(self, x: Sequence[float], y: Sequence[float], domain: Optional[Interval] = None):
+        if len(x) != len(y) or len(x) < 2:
+            raise ValueError(f"x and y must have the same length ({len(x)} != {len(y)}) and have atleast 2 points.")
         self.X = x
         self.Y = y
         self.domain = domain
         self.f = self._coeficientes() # O Callable principal para RealFunction
 
-    def _coeficientes(self):
+    def _coeficientes(self) -> Polinomio:
         n = len(self.X)
         coef = [0.0 for _ in range(n)]
 
@@ -127,10 +208,62 @@ class PolinomialInterpolation(RealFunction):
 
         return Polinomio(coef) 
 
-    def evaluate(self, v: float) -> float:
-        if len(self.X) != len(self.Y) or len(self.X) < 2:
-            raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
-        return self.f.evaluate(v)
+    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[plt.Figure, plt.Axes]:
+        """
+        Plota o gráfico do polinômio interpolador de Lagrange.
+
+        Args:
+            num_points (int): Número de pontos para desenhar a curva do polinômio.
+            margin (float): Percentual da margem (usado se domain=None).
+            domain (Optional[Interval]): Intervalo [min, max] explícito para plotar.
+
+        Returns:
+            tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+        Examples:
+                >>> x_poly = [0, 1, 2, 3]
+                >>> y_poly = [1, 2, 0, 5]
+                >>> P_poly = poly_interp(x_poly, y_poly)
+                >>> fig_poly, ax_poly = P_poly.plot() 
+                >>> plt.show()
+        """
+        fig, ax = plt.subplots()
+
+        # --- Gera pontos para a curva ---
+        if domain:
+            # Usa o domínio explícito se fornecido
+            plot_min = domain.min
+            plot_max = domain.max
+        else:
+            # Calcula o domínio baseado nos pontos e na margem
+            x_min = min(self.X)
+            x_max = max(self.X)
+            span = x_max - x_min
+            
+            if span == 0: 
+                plot_min = x_min - 1.0
+                plot_max = x_max + 1.0
+            else:
+                plot_min = x_min - span * margin
+                plot_max = x_max + span * margin
+
+        X_plot = np.linspace(plot_min, plot_max, num_points)
+        Y_plot = [self(x) for x in X_plot]
+
+        # --- Plota ---
+        # 1. A curva do polinômio
+        ax.plot(X_plot, Y_plot, label="Interpolador Polinomial", color="blue")
+        
+        # 2. Os pontos originais
+        ax.scatter(self.X, self.Y, color="red", zorder=5, label="Pontos originais")
+
+        # --- Configurações ---
+        ax.set_title("Interpolação Polinomial")
+        ax.set_xlabel("x")
+        ax.set_ylabel("P(x)")
+        ax.grid(True)
+        ax.legend()
+        
+        return fig, ax
     
     
 
@@ -167,7 +300,7 @@ class PiecewiseLinearFunction(RealFunction):
         self.domain = domain if domain else Interval(min(x), max(x))
         self.f = self.evaluate # O Callable principal para RealFunction
 
-    def makePolynomialSegment(self, x1, x2, y1, y2) -> Polinomio:
+    def criar_segmento_polinomial(self, x1, x2, y1, y2) -> Polinomio:
         if x1 == x2:
             raise ValueError("Pontos x1 e x2 são o mesmo. Não é possível criar um segmento.")
 
@@ -241,7 +374,7 @@ class PiecewiseLinearFunction(RealFunction):
 
         return y1 + (v - x1) * ((y2 - y1) / (x2 - x1))
     
-    def find_root_segments(self) -> List[Tuple[float, float]]:
+    def encontrar_segmentos_raiz(self) -> List[Tuple[float, float]]:
         """
         Retorna uma lista de intervalos [a, b] onde f(a) * f(b) < 0.
         """
@@ -262,8 +395,8 @@ class PiecewiseLinearFunction(RealFunction):
             segments.append((self.X[-1], self.X[-1]))
             
         return segments
-
-    def plot(self) -> tuple[plt.Figure, plt.Axes]:
+    
+    def plot(self, *args, **kwargs) -> tuple[Figure, Axes]:
         """
         Plota o gráfico da função linear por partes.
         Returns:
@@ -320,6 +453,8 @@ def linear_interp(x: Sequence, y: Sequence) -> PiecewiseLinearFunction:
 
 
 if __name__ == "__main__":
+
+# --- Teste da linear_interp ---
     x = [0, 1, 2, 3, 4]
     y = [1, 3, 2, 5, 4]
     plf = linear_interp(x, y)
@@ -332,126 +467,32 @@ if __name__ == "__main__":
     fig2, ax2 = plf2.plot()
     plt.show()
 
+    # --- Teste da poly_interp ---
     x_poly = [0, 1, 2, 3]
     y_poly = [1, 2, 0, 5]
 
     # Usando a função poly_interp
-    P = poly_interp(x_poly, y_poly)
-    X_plot = [i / 10 for i in range(0, 31)]  # domínio para visualização
-    Y_plot = [P(x) for x in X_plot]
-
-
-    plt.figure()
-    plt.plot(X_plot, Y_plot, label="Interpolador Lagrange (função)")
-    plt.scatter(x_poly, y_poly, color="red", zorder=5, label="Pontos originais")
-    plt.title("Interpolação Polinomial via Função poly_interp")
-    plt.xlabel("x")
-    plt.ylabel("P(x)")
-    plt.grid(True)
-    plt.legend()
+    P_poly = poly_interp(x_poly, y_poly)
+    fig_poly, ax_poly = P_poly.plot(domain=Interval(0, 3.0), num_points=31) 
+    ax_poly.set_title("Interpolação Polinomial")
     plt.show()
 
+# --- Teste 1: Exemplo simples ---
+    x_h1 = [0.0, 1.0, 2.0]
+    y_h1 = [1.0, 2.0, 0.0]
+    dy_h1 = [0.0, 1.0, -1.0]
 
-    # --- Dados de exemplo ---
-    x = [0.0, 1.0, 2.0]
-    y = [1.0, 2.0, 0.0]
-    dy = [0.0, 1.0, -1.0]
-
-    # --- Cria interpolador de Hermite ---
-    P = hermite_interp(x, y, dy)
-
-    # --- Gera pontos para o gráfico ---
-    X_plot = [i / 20 for i in range(-5, 61)]  # de -0.25 até 3.05
-    Y_plot = [P.evaluate(X) for X in X_plot]
-
-    # --- Plota ---
-    plt.figure()
-    plt.plot(X_plot, Y_plot, label="Interpolador Hermite", color="blue")
-    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
-
-    # Desenha setinhas indicando derivadas (slopes)
-    for xi, yi, dyi in zip(x, y, dy):
-        plt.arrow(
-            xi, yi, 0.3, 0.3 * dyi, 
-            head_width=0.05, head_length=0.05,
-            fc='green', ec='green', zorder=6
-        )
-
-    plt.title("Interpolação de Hermite")
-    plt.xlabel("x")
-    plt.ylabel("P(x)")
-    plt.grid(True)
-    plt.legend()
+    P_h1 = hermite_interp(x_h1, y_h1, dy_h1)
+    fig_h1, ax_h1 = P_h1.plot()
     plt.show()
 
-    import numpy as np
-
-    # --- Dados de entrada baseados em f(x) = sin(x) ---
-    x = [0.0, np.pi/2, np.pi]
-    y = [np.sin(xi) for xi in x]  # [0.0, 1.0, 0.0]
-    dy = [np.cos(xi) for xi in x] # [1.0, 0.0, -1.0]
+# --- Teste para o caso de 4 pontos (usando o método .plot) ---
+    x_h3 = [0.0, 1.0, 2.0, 3.0]
+    y_h3 = [1.0, 2.0, 4.5, 2.5]
+    dy_h3 = [0.0, 1.0, -0.5, 0.5]
 
     # --- Cria interpolador de Hermite ---
-    P = HermiteInterpolation(x, y, dy)
-
-    # --- Gera pontos para o gráfico ---
-    # Vamos plotar de -0.5 a 4.0
-    X_plot = np.linspace(-0.5, 4.0, 100)
-    Y_plot = [P.evaluate(X) for X in X_plot]
-
-    # Gera a curva real do sin(x) para comparação
-    Y_real = np.sin(X_plot)
-
-    # --- Plota ---
-    plt.figure()
-    plt.plot(X_plot, Y_plot, label="Interpolador Hermite P(x)", color="blue")
-    plt.plot(X_plot, Y_real, label="Função Real (sin(x))", color="green", linestyle="--")
-    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
-
-    # Desenha setinhas indicando derivadas (slopes)
-    for xi, yi, dyi in zip(x, y, dy):
-        plt.arrow(
-            xi, yi, 0.4, 0.4 * dyi, 
-            head_width=0.05, head_length=0.05,
-            fc='orange', ec='orange', zorder=6
-        )
-
-    plt.title("Interpolação de Hermite (em sin(x))")
-    plt.xlabel("x")
-    plt.ylabel("P(x)")
-    plt.grid(True)
-    plt.legend()
-    plt.ylim(-1.5, 1.5) # Ajusta o zoom vertical
-    plt.show()
-
-    x = [0.0, 1.0, 2.0, 3.0]
-    y = [1.0, 2.0, 4.5, 2.5]
-    dy = [0.0, 1.0, -0.5, 0.5]
-
-    # --- Cria interpolador de Hermite ---
-    P = hermite_interp(x, y, dy)
-
-    # --- Gera pontos para o gráfico ---
-    X_plot = [i / 20 for i in range(-5, 81)]  # de -0.25 até 4.05
-    Y_plot = [P.evaluate(X) for X in X_plot]
-
-    # --- Plota ---
-    plt.figure(figsize=(7, 4))
-    plt.plot(X_plot, Y_plot, label="Interpolador de Hermite", color="blue")
-    plt.scatter(x, y, color="red", zorder=5, label="Pontos originais")
-
-    # Desenha setinhas indicando derivadas (slopes)
-    for xi, yi, dyi in zip(x, y, dy):
-        plt.arrow(
-            xi, yi, 0.3, 0.3 * dyi,
-            head_width=0.05, head_length=0.05,
-            fc='green', ec='green', zorder=6
-        )
-
-    plt.title("Interpolação de Hermite com 4 pontos")
-    plt.xlabel("x")
-    plt.ylabel("P(x)")
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
+    P_h3 = hermite_interp(x_h3, y_h3, dy_h3)
+    fig_h3, ax_h3 = P_h3.plot()
+    ax_h3.set_title("Interpolação de Hermite com 4 pontos")
     plt.show()

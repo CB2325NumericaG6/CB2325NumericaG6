@@ -1,5 +1,8 @@
 from typing import Callable, Optional, Sequence
+
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 # Gostei muito da implementação dessas classes da lista 7 do professor então decidi implementar com pequenas modificações
 class Domain:
@@ -102,7 +105,7 @@ class RealFunction:
     def __call__(self, x) -> float:
         return self.eval_safe(x)
     
-    def plot(self, intervalo: Optional[Interval] = None, pontos: int = 100) -> tuple[plt.Figure, plt.Axes]:
+    def plot(self, intervalo: Optional[Interval] = None, pontos: int = 100) -> tuple[Figure, Axes]:
         """
         Plota o gráfico da função real no intervalo especificado. Caso nenhum intervalo seja fornecido,
         será utilizado o domínio da função. Se o domínio da função também for None,uma exceção será 
@@ -118,6 +121,7 @@ class RealFunction:
             >>> fig, ax = f.plot(Interval(0, 5), pontos=200)
             >>> plt.show()
         """
+
         dominio = self.domain
         if intervalo is not None:
             dominio = intervalo
