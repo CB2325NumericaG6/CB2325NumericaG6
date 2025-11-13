@@ -1,6 +1,6 @@
 from typing import Callable, Sequence, Optional, List, Tuple
-from core import RealFunction, Interval
-from polinomios import Polinomio
+from .core import RealFunction, Interval
+from .polinomios import Polinomio
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes

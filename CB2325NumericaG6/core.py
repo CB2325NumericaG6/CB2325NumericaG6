@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Sequence, TYPE_CHECKING
+from typing import Callable, Optional, Sequence
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
