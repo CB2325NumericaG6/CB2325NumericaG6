@@ -1,10 +1,8 @@
 from typing import Callable, Optional, Sequence, TYPE_CHECKING
 
-#Não é executado no import da biblioteca, é apenas para o compilador 
-# entender o que são esses imports que são realizado posteriormente
-if TYPE_CHECKING:
-    from matplotlib.figure import Figure
-    from matplotlib.axes import Axes
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 
 # Gostei muito da implementação dessas classes da lista 7 do professor então decidi implementar com pequenas modificações
 class Domain:
@@ -123,9 +121,6 @@ class RealFunction:
             >>> fig, ax = f.plot(Interval(0, 5), pontos=200)
             >>> plt.show()
         """
-        import matplotlib.pyplot as plt
-        from matplotlib.figure import Figure 
-        from matplotlib.axes import Axes 
 
         dominio = self.domain
         if intervalo is not None:
