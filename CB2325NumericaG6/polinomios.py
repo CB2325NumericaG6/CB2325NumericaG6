@@ -94,7 +94,7 @@ class Polinomio(RealFunction):
     @property
     def prime(self): # type: ignore
         if self._primeFunc is None:
-            polinomio_derivado = self.diff()
+            polinomio_derivado = self.derivar()
             self._primeFunc = lambda x: polinomio_derivado.evaluate(x) 
         return self._primeFunc
     
@@ -174,7 +174,7 @@ class Polinomio(RealFunction):
             return NotImplemented
         return other._values == self._values
 
-    def divideBy(self, divisor: 'Polinomio') -> Tuple['Polinomio', 'Polinomio']:
+    def dividir_por(self, divisor: 'Polinomio') -> Tuple['Polinomio', 'Polinomio']:
         """
             Realiza a divisão polinomial A / B (self / divisor) e retorna (Quociente, remainder).
 
@@ -252,7 +252,7 @@ class Polinomio(RealFunction):
                 
         return Polinomio(PNegCoeffs, self.domain)
     
-    def getRealRootBounds(self) -> tuple[float, float]:
+    def get_limite_raizes(self) -> tuple[float, float]:
         """
             Calcula os limites superior positivo (L) e inferior negativo (l) 
             para todas as raízes reais do polinômio P(x)
@@ -283,7 +283,7 @@ class Polinomio(RealFunction):
         
         return l, L
 
-    def diff(self) -> 'Polinomio':
+    def derivar(self) -> 'Polinomio':
         """
             Retorna a derivada de um polinomio.
 
@@ -335,7 +335,7 @@ if __name__ == "__main__":
     p1 = Polinomio([4,6,8], Interval(1,4))
     p2 = Polinomio([2,3,4], Interval(5,6))
 
-    p3 = p1.divideBy(p2)
+    p3 = p1.dividir_por(p2)
 
     print(p3[0].domain)
 
@@ -343,7 +343,7 @@ if __name__ == "__main__":
     print(p3)
 
     print(pol)
-    dPol = pol.diff()
+    dPol = pol.derivar()
     print(dPol)
     print(pol.prime(1))
     print(dPol.domain)
@@ -353,3 +353,10 @@ if __name__ == "__main__":
     polinomio = Polinomio([1, 1, -3, 2], Interval(-6,6))  # Representa P(x) = x^2 - 3x + 2
     polinomio.plot(Interval(-2, 4), pontos=200)
     plt.show()
+
+    p = Polinomio([1,0,20,2,1])
+    p0 = Polinomio([0])
+    try:
+        print(p.dividir_por(p0))
+    except ValueError:
+        print("Division by zero")

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from erros import erro_absoluto, erro_relativo
+from .erros import erro_absoluto, erro_relativo
 
 # 1. Teste com o exemplo exato do PDF
 def test_exemplo_pdf():
