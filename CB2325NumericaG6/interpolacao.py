@@ -113,7 +113,7 @@ class HermiteInterpolation(RealFunction):
                     plot_max = x_max + span * margin
 
             X_plot = np.linspace(plot_min, plot_max, num_points)
-            Y_plot = [self.evaluate(x) for x in X_plot]
+            Y_plot = [self(x) for x in X_plot]
 
             # --- Plota ---
             # 1. A curva do polinômio
@@ -247,7 +247,7 @@ class PolinomialInterpolation(RealFunction):
                 plot_max = x_max + span * margin
 
         X_plot = np.linspace(plot_min, plot_max, num_points)
-        Y_plot = [self.evaluate(x) for x in X_plot]
+        Y_plot = [self(x) for x in X_plot]
 
         # --- Plota ---
         # 1. A curva do polinômio

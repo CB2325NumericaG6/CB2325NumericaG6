@@ -48,7 +48,10 @@ from .erros import (
 
 # Integração
 from .integracao import (
-    integral
+    integral_trapezio,
+    plot_integral_trapezio,
+    integral_riemann,
+    plot_integral_riemann
 )
 
 
@@ -91,5 +94,8 @@ __all__ = [
     'erro_relativo',
     
     # Integração
-    'integral',
+    'integral_trapezio',
+    'plot_integral_trapezio',
+    'integral_riemann',
+    'plot_integral_riemann'
 ]
