@@ -160,7 +160,7 @@ class PiecewiseLinearFunction(RealFunction):
         self.domain = domain if domain else Interval(min(x), max(x))
         self.f = self.evaluate # O Callable principal para RealFunction
 
-    def makePolynomialSegment(self, x1, x2, y1, y2) -> Polinomio:
+    def criar_segmento_polinomial(self, x1, x2, y1, y2) -> Polinomio:
         if x1 == x2:
             raise ValueError("Pontos x1 e x2 são o mesmo. Não é possível criar um segmento.")
 
@@ -234,7 +234,7 @@ class PiecewiseLinearFunction(RealFunction):
 
         return y1 + (v - x1) * ((y2 - y1) / (x2 - x1))
     
-    def find_root_segments(self) -> List[Tuple[float, float]]:
+    def encontrar_segmentos_raiz(self) -> List[Tuple[float, float]]:
         """
         Retorna uma lista de intervalos [a, b] onde f(a) * f(b) < 0.
         """

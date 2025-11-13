@@ -276,11 +276,11 @@ def plot_newton_raphson(f: Callable, intervalo:tuple[float, float], df: Callable
 
 
 def _sturmSequence(P: Polinomio) -> List[Polinomio]:
-    sequence = [P, P.diff()]
+    sequence = [P, P.derivar()]
     remainder = sequence[1]
     index = 1
     while True:
-        _, remainder = sequence[index-1].divideBy(sequence[index])
+        _, remainder = sequence[index-1].dividir_por(sequence[index])
         if remainder.isZero:
             break
 
@@ -365,7 +365,7 @@ if __name__ == '__main__':
 
 
     P = Polinomio([1.0,-2.0,-2.0,2.0, 0])
-    bounds = P.getRealRootBounds()
+    bounds = P.get_limite_raizes()
     print(bounds)
     raizes = sturm(P, bounds[0], bounds[1])
     print(raizes)
