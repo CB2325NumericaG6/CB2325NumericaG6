@@ -3,7 +3,7 @@
 from typing import Callable, List
 # Tentar executar localmente a partir da pasta geral do repositório vai dar erro, mas é assim mesmo que o import deve estar para o deploy.
 # Se quiser testar localmente use o comando 'python -m CB2325NumericaG6.raizes' sem as aspas.
-from .polinomios import Polinomio
+from polinomios import Polinomio
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 import numpy as np

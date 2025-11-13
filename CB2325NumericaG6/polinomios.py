@@ -1,7 +1,7 @@
 from typing import List, Tuple, Callable, Optional, cast
 # Tentar executar localmente a partir da pasta geral do repositório vai dar erro, mas é assim mesmo que deve estar para o deploy.
 # Se quiser testar localmente use o comando 'python -m CB2325NumericaG6.polinomios' sem as aspas.
-from .core import RealFunction, Interval, Domain, safe_intersect
+from core import RealFunction, Interval, Domain, safe_intersect
 from sys import float_info
 
 class Polinomio(RealFunction):
