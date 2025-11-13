@@ -353,3 +353,10 @@ if __name__ == "__main__":
     polinomio = Polinomio([1, 1, -3, 2], Interval(-6,6))  # Representa P(x) = x^2 - 3x + 2
     polinomio.plot(Interval(-2, 4), pontos=200)
     plt.show()
+
+    p = Polinomio([1,0,20,2,1])
+    p0 = Polinomio([0])
+    try:
+        print(p.divideBy(p0))
+    except ValueError:
+        print("Division by zero")
