@@ -1,16 +1,10 @@
 import math
 import statistics
-<<<<<<< HEAD
-from core import Interval
-from typing import Optional
-from polinomios import Polinomio
-import numpy as np
-import matplotlib.pyplot as plt
-=======
+from .core import Interval
 from .polinomios import Polinomio
+from typing import Optional, Sequence
+import matplotlib.pyplot as plt
 import numpy as np
-from typing import Sequence
->>>>>>> c33c04057f69b646ba94bbda36bc1d06dd0298f6
 
 def ajuste_linear(x: Sequence, y: Sequence) -> Polinomio:
     """
