@@ -12,7 +12,7 @@ authors = [
     {name= "Mateus Almeida Oliveira", email="al.mateus.oliveira@impatech.edu.br"}
 ]
 dependencies = [
-    "matplotlib"
+    "matplotlib",
     "numpy"
 ]
 classifiers = [
