@@ -73,11 +73,11 @@ def test_soma_preserva_intersecao_de_dominios():
 # ----------------------
 # derivada e prime
 # ----------------------
-def test_diff_e_prime_property():
+def test_derivar_e_prime_property():
     P = Polinomio([3.0, 2.0, -1.0])    # 3x^2+2x-1  ->  6x+2
-    dP = P.diff()
+    dP = P.derivar()
     assert isinstance(dP, Polinomio)
-    # prime usa diff internamente
+    # prime usa derivar internamente
     x = 5.0
     assert P.prime(x) == pytest.approx(dP.evaluate(x), rel=1e-12)
     assert dP._values == [6.0, 2.0]
@@ -89,7 +89,7 @@ def test_diff_e_prime_property():
 def test_divide_by_constante():
     P = Polinomio([4.0, 6.0, 8.0])   # 4x^2+6x+8
     D = Polinomio([2.0])             # 2
-    Q, R = P.divideBy(D)
+    Q, R = P.dividir_por(D)
     # (4x^2+6x+8)/2 = 2x^2+3x+4, resto 0
     assert Q._values == [2.0, 3.0, 4.0]
     assert R._values == [0.0]
@@ -98,14 +98,14 @@ def test_divide_by_constante():
 def test_divide_by_mesmo_grau_da_docstring():
     p1 = Polinomio([4.0, 6.0, 8.0])
     p2 = Polinomio([2.0, 3.0, 4.0])
-    Q, R = p1.divideBy(p2)
+    Q, R = p1.dividir_por(p2)
     assert Q._values == [2.0]
     assert R._values == [0.0]
 
 
 def test_divide_by_zero_gera_erro():
     with pytest.raises(ValueError):
-        _ = Polinomio([1.0]).divideBy(Polinomio([0.0]))
+        _ = Polinomio([1.0]).dividir_por(Polinomio([0.0]))
 
 
 # ----------------------
@@ -114,7 +114,7 @@ def test_divide_by_zero_gera_erro():
 def test_get_real_root_bounds_cobre_raizes_reais():
     # (x-1)(x+2) = x^2 + x - 2  -> raízes reais -2 e 1
     P = Polinomio([1.0, 1.0, -2.0])
-    l, L = P.getRealRootBounds()
+    l, L = P.get_limite_raizes()
     assert l <= -2.0 + 1e-12   # bound inferior cobre -2
     assert L >= 1.0 - 1e-12    # bound superior cobre 1
 
