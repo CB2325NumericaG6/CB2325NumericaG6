@@ -50,7 +50,7 @@ Esse módulo é direcionado a funções de aproximação numérica.
 [✅] Status: Concluído
 
 ```python
-ajuste_linear(x: list[float], y: list[float]) -> Polinomio
+ajuste_linear(x: Sequence, y: Sequence) -> Polinomio
 ```
 **Entrada:**
 
@@ -59,14 +59,14 @@ A função recebe duas listas de variáveis, uma de coordenadas X e outra de coo
 As listas devem ter tamanhos iguais, pois cada ponto Y corresponde ao respectivo ponto X.
 
 **Retorno:**
-A função retorna o ajuste linear $y = ax + b$ da série de pontos por meio de um `Polinomio` [a,b]
+A função retorna o ajuste linear $y = ax + b$ da série de pontos por meio de um `Polinomio` [a,b].
 
-`ajuste_polinomial(x, y, n)`:
+`ajuste_polinomial(x, y, n, precisao)`:
 
 [✅] Status: Concluído
 
 ```python
-ajuste_polinomial(x: list[float], y: list[float], n: int) -> Polinomio
+ajuste_polinomial(x: Sequence, y: Sequence, n: int = 2, precisao: int = 5) -> Polinomio
 ```
 **Entrada:**
 
@@ -75,6 +75,36 @@ As listas devem ter tamanhos iguais, pois cada ponto Y corresponde ao respectivo
 
 **Retorno:**
 A função retorna o ajuste polinomial $y = a_0*x^n + a_1*x^(n-1) + ... + a_n$ da série de pontos por meio de um `Polinomio`.
+
+`plot_ajuste(x, y, ajustes, domain, num_points)`:
+
+[✅] Status: Concluído
+
+```python
+plot_ajuste(
+    x: Sequence, 
+    y: Sequence, 
+    ajustes: dict[str, Polinomio], 
+    domain: Optional[Interval] = None,
+    num_points: int = 100
+) -> tuple[Figure, Axes]
+```
+
+**Descrição:**
+
+Plota os dados originais (x, y) e um ou mais polinômios de ajuste.
+
+**Entrada:**
+
+  - `x` (Sequence): Lista de coordenadas X originais.
+  - `y` (Sequence): Lista de coordenadas Y originais.
+  - `ajustes` (dict[str, Polinomio]): Dicionário onde a chave é o rótulo (ex: "Linear") e o valor é o objeto Polinomio ajustado.
+  - `domain` (Optional[Interval]): Intervalo [min, max] explícito para plotar.
+  - `num_points` (int): Número de pontos para desenhar as curvas.
+
+**Retorno:**
+
+  - `tuple[plt.Figure, plt.Axes]`: Figura e eixos do gráfico plotado.
 
 # Core (.core)
 
@@ -199,7 +229,7 @@ Fórmula: er = |valor_real - valor_aprox| / |valor_real|
 [✅] Status: Concluído
 
 ```python
-erro_absoluto(valor_real, valor_aprox)
+erro_relativo(valor_real, valor_aprox)
 ```
 
 **Entrada:**
@@ -217,12 +247,14 @@ Módulo que compõe as funções de integração.
 
 ## Funções
 
-`integral(f, start, end, divisions)`
+`integral_trapezio(f, start, end, divisions)`
+
+Esse método calcula a integral de uma função por aproximação trapezoidal.
 
 [✅] Status: Concluído
 
 ```python
-integral(f:Callable, start: float, end: float, divisions: int) -> float
+integral_trapezio(f:Callable, start: float, end: float, divisions: int) -> float
 ```
 
 **Entrada:**
@@ -234,6 +266,55 @@ integral(f:Callable, start: float, end: float, divisions: int) -> float
 **Retorno:**
 - float: Valor da integral.
 
+`plot_integral_trapezio(f, start, end, divisions)`
+
+Plota a função f e os trapézios de integração.
+
+[✅] Status: Concluído
+
+```python
+plot_integral_trapezio(f: Callable, start: float, end: float, divisions: int) -> tuple[plt.Figure, plt.Axes]
+```
+
+**Retorno:**
+
+- tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+
+`integral_riemann(f, start, end, divisions)`
+
+Este método calcula a integral de uma função por soma de Riemann (ponto médio).
+
+[✅] Status: Concluído
+
+```python
+integral_riemann(f:Callable, start:float, end:float, divisions:int) -> float
+```
+
+**Entrada:**
+
+- f (Callable): Função a ser integrada.
+- start (float): Ponto inicial do intervalo.
+- end (float): Ponto final do intervalo.
+- divisions (int): Número de subdivisões do intervalo.
+
+**Retorno:**
+
+- float: Valor da integral.
+
+`plot_integral_riemann(f, start, end, divisions)`
+
+Plota a função f e os retângulos da soma de Riemann (ponto médio).
+
+[✅] Status: Concluído
+
+```python
+plot_integral_riemann(f: Callable, start: float, end: float, divisions: int) -> tuple[plt.Figure, plt.Axes]
+```
+
+**Retorno:**
+
+- tuple[plt.Figure, plt.Axes]: Figura e eixos do gráfico plotado.
+
 # Interpolação (.interpolacao)
 
 Módulo que compõe as funções de interpolação.
@@ -241,6 +322,38 @@ Módulo que compõe as funções de interpolação.
 `Interpolator` é um `callable` que recebe `float` e retorna `float`
 
 ## Classes:
+
+`HermiteInterpolation(RealFunction)`
+
+[✅] Status: Concluído
+
+**\_\_init\_\_(x, y, dy, domain: Optional[Interval])**: Cria uma interpolação polinomial de Hermite a partir da lista de pontos X, Y e derivadas DY.
+
+### Atributos
+- f: Callable[[float], float]: Função principal
+- domain: Optional[Interval]: Domínio da função (Opcional)
+- X: Sequence[float]: Lista de valores X
+- Y: Sequence[float]: Lista de valores Y
+
+### Métodos:
+
+- **plot(...) -> tuple[Figure, Axes]**: Plota o gráfico do polinômio interpolador de Hermite.
+
+`PolinomialInterpolation(RealFunction)`
+
+[✅] Status: Concluído
+
+**\_\_init\_\_(x, y, domain: Optional[Interval])**: Cria uma interpolação polinomial (Lagrange) a partir da lista de pontos X, Y.
+
+### Atributos
+- f: Callable[[float], float]: Função principal
+- domain: Optional[Interval]: Domínio da função (Opcional)
+- X: Sequence[float]: Lista de valores X
+- Y: Sequence[float]: Lista de valores Y
+
+### Métodos:
+
+- **plot(...) -> tuple[Figure, Axes]**: Plota o gráfico do polinômio interpolador de Lagrange.
 
 `PiecewiseLinearFunction(RealFunction)`
 
@@ -259,18 +372,18 @@ Módulo que compõe as funções de interpolação.
 
 ### Métodos:
 - **evaluate(v: float) -> float**: Calcula o valor interpolado linearmente entre os pontos.
-- **makePolynomialSegment(x1, x2, y1, y2) -> Polinomio**: Retorna um polinomio linear para os pontos dados.
-- **find_root_segments() -> List[Tuple[float,float]]**: Retorna uma lista com todos os intervalos [a,b] que contém raízes.
+- **criar_segmento_polinomial(x1, x2, y1, y2) -> Polinomio**: Retorna um polinomio linear para os pontos dados.
+- **encontrar_segmentos_raiz() -> List[Tuple[float,float]]**: Retorna uma lista com todos os intervalos [a,b] que contém raízes.
+- **plot(...) -> tuple[Figure, Axes]**: Plota o gráfico da função linear por partes.
 
 ## Funções
 
-`linear_interp(x, y)`, `poly_interp(x, y)`
+`linear_interp(x, y)`
 
 [✅] Status: Concluído
 
 ```python
 linear_interp(x: Sequence, y: Sequence) -> PiecewiseLinearFunction
-poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator
 ```
 
 **Entrada:**
@@ -279,15 +392,31 @@ poly_interp(x: Sequence[float], y: Sequence[float]) -> Interpolator
 - y (Sequence): Lista de coordenadas do eixo Y
 
 **Retorno:**
-- PiecewiseLinearFunction.
-- Interpolator: Uma função que retorna o valor interpolado linearmente baseado nos valores X, Y.
+- PiecewiseLinearFunction: O objeto de interpolação linear por partes.
+
+`poly_interp(x, y)`
+
+[✅] Status: Concluído
+
+```python
+poly_interp(x: Sequence[float], y: Sequence[float]) -> PolinomialInterpolation
+```
+
+**Entrada:**
+
+- x (Sequence): Lista de coordenadas do eixo X.
+- y (Sequence): Lista de coordenadas do eixo Y.
+
+**Retorno:**
+
+- PolinomialInterpolation: Um objeto chamável que avalia o polinômio interpolador.
 
 `hermite_interp(x, y, dy)`
 
 [✅] Status: Concluído
 
 ```python
-hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> Interpolator
+hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> HermiteInterpolation
 ```
 
 **Entrada:**
@@ -297,8 +426,7 @@ hermite_interp(x: Sequence[float], y: Sequence[float], dy: Sequence[float]) -> I
 - dy (Sequence): Derivada dos valores para cada Y.
 
 **Retorno:**
-- Interpolator: Uma função que retorna o valor em um ponto pela interpolação de hermite baseado nos valores X, Y, dy.
-
+- HermiteInterpolation: Um objeto chamável que avalia o polinômio interpolador de Hermite.
 # Polinomios (.polinomios)
 
 Módulo para definição e cálculo de polinomios.
@@ -307,34 +435,40 @@ Módulo para definição e cálculo de polinomios.
 
 `Polinomio(RealFunction)`
 
+Representa um polinômio como uma lista de coeficientes, ordenados do termo de **maior grau** para o termo constante.
+
 [✅] Status: Concluído
 
 ### Métodos mágicos:
-- **\_\_init\_\_(values: List[float])**
+- **\_\_init\_\_(values: List[float], domain: Optional[Interval] = None)**
 - **\_\_repr\_\_**
 - **\_\_len\_\_**
 - **\_\_getitem\_\_**
 - **\_\_setitem\_\_**
-- **\_\_mul\_\_, \_\_rmul\_\_**
+- **\_\_mul\_\_, \_\_rmul\_\_** (por escalar)
 - **\_\_neg\_\_**
-- **\_\_add\_\_**
-- **\_\_sub\_\_**
+- **\_\_add\_\_** (com outro Polinomio)
+- **\_\_sub\_\_** (com outro Polinomio)
 - **\_\_eq\_\_**
 
 ### Propriedades:
 - **degree**: (int) Retorna o grau do polinômio
 - **isZero**: (bool) Retorna True se o polinômio é nulo `[0.0]` ou False caso contrário.
-- **prime**: (Polinomio) Retorna o polinomio derivado do polinomio.
+- **prime**: (Callable[[float], float]) Retorna uma *função* (lambda) que avalia a derivada do polinômio em um ponto.
 
 ### Métodos:
 - **evaluate(x: float) -> float**: Calcula o valor do polinômio em um determinado ponto.
-- **divideBy(divisor: Polinomio) -> Tuple[Polinomio, Polinomio]**: Realiza a divisão do polinomio por outro polinomio e retorna uma tupla da forma (Polinomio dividido, resto).
-- **getRealRootBounds() -> tuple[float, float]**: Calcula os limites inferior e superior no quais estão todas as raízes reais positivas do polinômio;
-- **diff() -> Polinomio**: Calcula a derivada do polinomio e retorna um objeto Polinomio correspondente.
+- **dividir_por(divisor: Polinomio) -> Tuple[Polinomio, Polinomio]**: Realiza a divisão do polinomio por outro polinomio e retorna uma tupla da forma (Quociente, Resto).
+- **get_limite_raizes() -> tuple[float, float]**: Calcula os limites inferior e superior no quais estão todas as raízes reais positivas do polinômio.
+- **derivar() -> Polinomio**: Calcula a derivada do polinomio e retorna um novo objeto Polinomio correspondente.
 
 ## Funções
 
 `lambdify(P)`
+
+**Descrição:**
+
+Cria e retorna uma função lambda (Callable) que avalia o polinômio P(x). É apenas um wrapper do método `evaluate` que pode ser passado para funções como `secante` ou `bisseccao`.
 
 [✅] Status: Concluído
 
@@ -348,7 +482,7 @@ lambdify(P: 'Polinomio') -> Callable[[float], float]:
 
 **Retorno:**
 
-- Callable[[float], float]: Uma função lambda que recebe x (float) e retorna P(x) (float). *É apenas um wrapper do método evaluate que pode ser passadas para funções como `integral`*
+- `Callable[[float], float]`: Uma função lambda que recebe x (float) e retorna P(x) (float).
 
 # Raízes (.raizes)
 
@@ -362,18 +496,18 @@ Módulo com funções de busca de raíz e cálculo de número de raízes.
 [✅] Status: Concluído
 
 ```python
-secante(f: Callable, a: float, b: float, tol: float) -> float
-bissecao(f: Callable, a: float, b: float, tol: float) -> float
+secante(f: Callable, a: float, b: float, tol: float = 1e-6) -> float
+bissecao(f: Callable, a: float, b: float, tol: float = 1e-6) -> float
 ```
 
 **Entrada:**
 - f: Função a ser analizada
-- a: Intervalo inicial da função f
-- b: Intervalo final da função f
+- a: Ponto inicial do intervalo da função f
+- b: Ponto final do intervalo da função f
 - tol: Tolerancia para o erro da aproximação final
 
 **Retorno:**
-- float: Aproximação da raiz da função no intervalo [a, b]
+- float: Aproximação da raiz da função.
 
 `plot_secante(f, intervalo, a, b, tol)`, `plot_bisseccao(f, intervalo, a, b, tol)`
 
@@ -400,7 +534,7 @@ plot_bisseccao(f: Callable, intervalo:tuple[float, float], a: float, b: float, t
 [✅] Status: Concluído
 
 ```python
-newton_raphson(f: Callable, df: Callable, a:float, tol: float)
+newton_raphson(f: Callable, df: Callable, a:float, tol: float = 1e-6)
 ```
 
 **Entrada:**
@@ -430,3 +564,21 @@ plot_newton_raphson(f: Callable, intervalo:tuple[float, float], df: Callable, a:
 **Retorno:**
 - fig: Imagem da plotagem gerada.
 
+`sturm(P, a, b)`
+
+Calcula o número de raízes reais de um polinomio no intervalo (a,b].
+
+[✅] Status: Concluído
+
+```python
+sturm(P: Polinomio, a: float, b: float) -> int
+```
+
+**Entrada:**
+
+- P (Polinomio): Polinomio a ser avaliado.
+- a (float): Extremo inferior do intervalo.
+- b (float): Extremo superior do intervalo.
+
+**Retorno:**
+- int: Número de raízes reais no intervalo (a,b].
