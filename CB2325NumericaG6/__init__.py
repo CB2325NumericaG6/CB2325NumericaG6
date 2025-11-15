@@ -26,7 +26,8 @@ from .interpolacao import (
 # Aproximação e Ajuste
 from .aproximacao import (
     ajuste_linear,
-    ajuste_polinomial
+    ajuste_polinomial,
+    plot_ajuste
 )
 
 # Raízes
@@ -79,6 +80,7 @@ __all__ = [
     # Aproximação
     'ajuste_linear',
     'ajuste_polinomial',
+    'plot_ajuste',
     
     # Raízes
     'secante',

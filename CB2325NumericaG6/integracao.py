@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from typing import Callable
 from numpy import linspace
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 # Falta implementar o linspace de core.py
 
 def integral_trapezio(f:Callable, start: float, end: float, divisions: int) -> float:
@@ -34,7 +36,7 @@ def integral_trapezio(f:Callable, start: float, end: float, divisions: int) -> f
     
     return sumVal
 
-def plot_integral_trapezio(f: Callable, start: float, end: float, divisions: int) -> tuple[plt.Figure, plt.Axes]:
+def plot_integral_trapezio(f: Callable, start: float, end: float, divisions: int) -> tuple[Figure, Axes]:
     """
     Plota a função f e os trapézios de integração (versão melhorada).
     """
@@ -88,7 +90,7 @@ def integral_riemann(f:Callable, start:float, end:float, divisions:int) -> float
 
     return i
 
-def plot_integral_riemann(f: Callable, start: float, end: float, divisions: int) -> tuple[plt.Figure, plt.Axes]:
+def plot_integral_riemann(f: Callable, start: float, end: float, divisions: int) -> tuple[Figure, Axes]:
     """
     Plota a função f e os retângulos da soma de Riemann (ponto médio).
     """
