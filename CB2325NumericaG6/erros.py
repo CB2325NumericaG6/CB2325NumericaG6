@@ -36,7 +36,7 @@ def erro_relativo(valor_real, valor_aprox):
                           Retorna np.inf se valor_real for 0 e valor_aprox não.
                           Retorna 0.0 se ambos forem 0.
     """
-    # Garante que a entrada seja um array NumPy para operações vectorizadas
+# Garante que a entrada seja um array NumPy para operações vectorizadas
     # Se já for escalar, np.asarray() lida com isso sem problemas
     valor_real = np.asarray(valor_real)
     valor_aprox = np.asarray(valor_aprox)
@@ -46,21 +46,17 @@ def erro_relativo(valor_real, valor_aprox):
     # Prepara um array de saída com o mesmo formato da entrada,
     # preenchido com np.inf (para o caso de divisão por zero)
     # dtype=float garante que tenhamos um float mesmo se a entrada for int
-    er = np.full_like(ea, np.inf, dtype=float)
-    
-    # Encontra os índices onde valor_real NÃO é zero
-    indices_nao_zero = np.where(valor_real != 0)
-    
-    # Calcula o erro relativo apenas para esses índices
-    # np.abs(valor_real[indices_nao_zero]) garante que o denominador seja positivo
-    er[indices_nao_zero] = ea[indices_nao_zero] / np.abs(valor_real[indices_nao_zero])
+    er = np.divide(ea, 
+                   np.abs(valor_real), 
+                   out=np.full_like(ea, np.inf, dtype=float), 
+                   where=(valor_real != 0))
 
     # Caso especial: onde valor_real e valor_aprox são 0, o erro é 0
-    indices_ambos_zero = np.where((valor_real == 0) & (valor_aprox == 0))
-    er[indices_ambos_zero] = 0.0
+    condicao_ambos_zero = (valor_real == 0) & (valor_aprox == 0)
+    er = np.where(condicao_ambos_zero, 0.0, er)
 
     # Se a entrada foi um único número (escalar), retorna um escalar
     if er.ndim == 0: # ndim é num de dimensões
         return float(er)
-        
+    
     return er
