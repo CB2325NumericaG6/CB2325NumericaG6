@@ -1,4 +1,3 @@
-# Esse projeto está em desenvolvimento:
 Esse projeto foi desenvolvido pelo Grupo 6 para a disciplina de Programação 2 (CB23) do IMPA Tech
 
 Feito por:
@@ -18,7 +17,6 @@ Feito por:
 <br/>
 
 # Versão do projeto: v1.2.1
-Added erros/raizes/interpolacao methods
 
 # Documentação
 
