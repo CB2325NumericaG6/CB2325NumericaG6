@@ -64,6 +64,12 @@ class Polinomio(RealFunction):
         else:
             self._values[index] = value
 
+    def __key(self):
+        return (self._values)
+
+    def __hash__(self):
+        return hash(self.__key())
+
     def _clearZeros(self):
         """
         Função interna para remover os 0s dos líderes

@@ -64,13 +64,9 @@ class HermiteInterpolation(RealFunction):
             coef.pop()
 
         return Polinomio(coef[::-1])
-        
-    def evaluate(self, v: float) -> float:
-        if len(self.X) != len(self.Y) or len(self.X) < 2:
-            raise ValueError(f"x and y must have the same length ({len(self.X)} != {len(self.Y)}) and have atleast 2 points.")
-        return self.f.evaluate(v)
 
-    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[plt.Figure, plt.Axes]:
+
+    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[Figure, Axes]: #type: ignore
             """
             Plota o gráfico do polinômio interpolador de Hermite.
 
@@ -208,7 +204,7 @@ class PolinomialInterpolation(RealFunction):
 
         return Polinomio(coef) 
 
-    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[plt.Figure, plt.Axes]:
+    def plot(self, num_points: int = 100, margin: float = 0.2, domain: Optional[Interval] = None) -> tuple[Figure, Axes]: #type: ignore
         """
         Plota o gráfico do polinômio interpolador de Lagrange.
 

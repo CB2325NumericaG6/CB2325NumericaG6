@@ -4,6 +4,8 @@ from .core import Interval
 from .polinomios import Polinomio
 from typing import Optional, Sequence
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import numpy as np
 
 def ajuste_linear(x: Sequence, y: Sequence) -> Polinomio:
@@ -68,7 +70,7 @@ def ajuste_polinomial(x: Sequence, y: Sequence, n = 2, precisao = 5) -> Polinomi
     Poly = Polinomio([round(Coeficientes[i],precisao) for i in range(len(Coeficientes))])
     return Poly
 
-def plot_ajuste(x: list[float], y: list[float], ajustes: dict[str, Polinomio], domain: Optional[Interval] = None,num_points: int = 100) -> tuple[plt.Figure, plt.Axes]:
+def plot_ajuste(x: Sequence, y: Sequence, ajustes: dict[str, Polinomio], domain: Optional[Interval] = None,num_points: int = 100) -> tuple[Figure, Axes]:
     """
     Plota os dados originais (x, y) e um ou mais polinômios de ajuste.
 
