@@ -17,7 +17,7 @@ Feito por:
 
 <br/>
 
-# Versão do projeto: v0.0.5
+# Versão do projeto: v1.2.0
 Added erros/raizes/interpolacao methods
 
 # Documentação
