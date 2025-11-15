@@ -13,7 +13,7 @@ authors = [
 ]
 dependencies = [
     "matplotlib",
-    "numpy"
+    "numpy",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
